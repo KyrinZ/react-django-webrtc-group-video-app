@@ -36,7 +36,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "api.apps.ApiConfig",
 ]
 
 THIRD_PARTIES = [
@@ -44,7 +43,7 @@ THIRD_PARTIES = [
     "corsheaders",
     "channels",
 ]
-PROJECT_APPS = ["video_signalling"]
+PROJECT_APPS = ["api", "video_signalling"]
 
 
 INSTALLED_APPS += THIRD_PARTIES + PROJECT_APPS

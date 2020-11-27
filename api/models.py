@@ -1,8 +1,5 @@
 from django.conf import settings
-from django.contrib.auth.models import (
-    AbstractUser,
-    BaseUserManager,
-)
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -52,16 +49,15 @@ class User(AbstractUser):
     objects = UserManager()
 
 
-class Event(models.Model):
+class Room(models.Model):
 
     """
-    Event Model duh?!!
+    Room Model for group calling
     """
 
     EVENT_TYPE = [
         ("OTA", "Open to all"),
         ("IO", "Invite only"),
-        ("RO", "Register only"),
         ("L", "Locked"),
     ]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -72,21 +68,7 @@ class Event(models.Model):
         choices=EVENT_TYPE,
         default="OTA",
     )
-    is_scheduled = models.BooleanField(default=False)
     created_on = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
-
-
-class EventSchedule(models.Model):
-    """
-    Schedule table for an event
-    """
-
-    event = models.ForeignKey(
-        Event, related_name="event_schedule", on_delete=models.CASCADE
-    )
-    date = models.DateField()
-    time_starts_at = models.TimeField()
-    time_ends_at = models.TimeField()
