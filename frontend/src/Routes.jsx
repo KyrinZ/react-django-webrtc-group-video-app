@@ -8,8 +8,7 @@ import {
 import jwt_decode from "jwt-decode";
 
 // Components
-import { Nav, EventList, Login, Register } from "./components";
-import EventRoom from "./components/video/EventRoom";
+import { Nav, RoomList, VideoRoom, Login, Register } from "./components";
 
 import { axiosInstance } from "./components";
 
@@ -19,51 +18,57 @@ export class Routes extends Component {
 
     this.state = {
       loggedInStatus: false,
+      userId: null,
     };
 
-    this.checkLogStatus = this.checkLogStatus.bind(this);
+    this.checkLogInStatus = this.checkLogInStatus.bind(this);
     this.navigationBar = this.navigationBar.bind(this);
     this.loginPage = this.loginPage.bind(this);
     this.registerPage = this.registerPage.bind(this);
   }
 
-  // Later I have to use JWT verification here
-  checkLogStatus = () => {
+  checkLogInStatus = () => {
+    const refreshToken = localStorage.getItem("refresh_token");
     axiosInstance
-      .post("token/refresh/", {
-        refresh: localStorage.getItem("refresh_token"),
+      .post("token/verify/", {
+        token: refreshToken,
       })
       .then((response) => {
         if (response.status === 200) {
+          const userId = jwt_decode(refreshToken).user_id;
           this.setState({
             loggedInStatus: true,
+            userId: userId,
           });
-          console.log("User logged in");
+
+          console.log("User is logged in now");
         }
       })
       .catch((error) => {
         this.setState({
           loggedInStatus: false,
+          userId: null,
         });
         console.log(error.message);
-        console.log("User not logged in");
+        console.log("User is not logged in or register yet");
       });
   };
 
   navigationBar = (props) => {
     return (
       <Nav
-        {...props}
-        checkLogStatus={this.checkLogStatus}
+        checkLogInStatus={this.checkLogInStatus}
         loggedInStatus={this.state.loggedInStatus}
+        {...props}
       />
     );
   };
+
   loginPage = () => {
     return this.state.loggedInStatus ? (
       <Redirect to="/" exact />
     ) : (
-      <Login checkLogStatus={this.checkLogStatus} />
+      <Login checkLogInStatus={this.checkLogInStatus} />
     );
   };
 
@@ -71,12 +76,12 @@ export class Routes extends Component {
     return this.state.loggedInStatus ? (
       <Redirect to="/" exact />
     ) : (
-      <Register checkLogStatus={this.checkLogStatus} />
+      <Register checkLogInStatus={this.checkLogInStatus} />
     );
   };
 
   componentDidMount = () => {
-    this.checkLogStatus();
+    this.checkLogInStatus();
   };
 
   render() {
@@ -85,10 +90,10 @@ export class Routes extends Component {
         <Router>
           <Route render={this.navigationBar} />
           <Switch>
-            <Route exact path="/" component={EventList} />
+            <Route exact path="/" component={RoomList} />
             <Route exact path="/login" render={this.loginPage} />
             <Route exact path="/register" render={this.registerPage} />
-            <Route exact path="/event/room" component={EventRoom} />
+            <Route exact path="/event/room" component={VideoRoom} />
           </Switch>
         </Router>
       </>

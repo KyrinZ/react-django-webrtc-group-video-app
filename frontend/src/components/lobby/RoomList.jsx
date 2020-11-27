@@ -9,9 +9,9 @@ import Container from "@material-ui/core/Container";
 import { withStyles } from "@material-ui/core/styles";
 
 // Components
-import Event from "./Event";
-import { CreateEventForm } from "./EventForm";
-import { axiosInstance } from "../authentication";
+import Room from "./Room";
+import CreateRoomForm from "./RoomForm/CreateRoomForm";
+import axiosInstance from "../utilities/axios";
 
 const styles = {
   loading: {
@@ -19,32 +19,26 @@ const styles = {
   },
 };
 
-class EventList extends Component {
+class RoomList extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      eventData: [],
-      loadingEvents: true,
-      openEventForm: false,
+      roomListData: [],
+      loadingRooms: true,
+      openRoomForm: false,
     };
 
-    this.deleteEvent = this.deleteEvent.bind(this);
-    this.eventFormClose = this.eventFormClose.bind(this);
-    this.eventFormOpen = this.eventFormOpen.bind(this);
-    this.onEventFormSubmit = this.onEventFormSubmit.bind(this);
+    this.deleteRoom = this.deleteRoom.bind(this);
+    this.roomFormClose = this.roomFormClose.bind(this);
+    this.roomFormOpen = this.roomFormOpen.bind(this);
+    this.onRoomFormSubmit = this.onRoomFormSubmit.bind(this);
   }
 
-  onEventFormSubmit(data, { resetForm }) {
-    if (!data.isScheduled) {
-      data.schedules = [];
-    }
-
+  onRoomFormSubmit(data, { resetForm }) {
     const jsonData = {
       title: data.title,
       description: data.description,
       typeOf: data.typeOf,
-      isScheduled: data.isScheduled,
-      eventSchedule: data.schedules,
     };
 
     axiosInstance
@@ -53,51 +47,51 @@ class EventList extends Component {
         resetForm();
 
         this.setState({
-          openEventForm: false,
-          loadingEvents: true,
+          openRoomForm: false,
+          loadingRooms: true,
         });
 
         axiosInstance
           .get("events/")
           .then((res) => {
             this.setState(() => ({
-              eventData: res.data,
-              loadingEvents: false,
+              roomListData: res.data,
+              loadingRooms: false,
             }));
           })
-          .catch((error) => console.log(error));
+          .catch((error) => console.log(error.message));
       })
-      .catch((error) => console.log(error));
+      .catch((error) => console.log(error.message));
   }
 
-  deleteEvent(eventID) {
+  deleteRoom(roomId) {
     axiosInstance
-      .delete("events/" + eventID)
+      .delete("events/" + roomId)
       .then((res) => {
         this.setState({
-          loadingEvents: true,
+          loadingRooms: true,
         });
         axiosInstance
           .get("events/")
           .then((res) => {
             this.setState(() => ({
-              eventData: res.data,
-              loadingEvents: false,
+              roomListData: res.data,
+              loadingRooms: false,
             }));
           })
-          .catch((error) => console.log(error));
+          .catch((error) => console.log(error.message));
       })
-      .catch((err) => console.log(err.message));
+      .catch((error) => console.log(error.message));
   }
 
-  eventFormClose() {
+  roomFormClose() {
     this.setState({
-      openEventForm: false,
+      openRoomForm: false,
     });
   }
-  eventFormOpen() {
+  roomFormOpen() {
     this.setState({
-      openEventForm: true,
+      openRoomForm: true,
     });
   }
 
@@ -105,10 +99,10 @@ class EventList extends Component {
     axiosInstance
       .get("events/")
       .then((res) => {
-        this.setState(() => ({ eventData: res.data, loadingEvents: false }));
+        this.setState(() => ({ roomListData: res.data, loadingRooms: false }));
       })
       .catch((error) => {
-        this.setState(() => ({ loadingEvents: false }));
+        this.setState(() => ({ loadingRooms: false }));
         console.log(error.message);
       });
   }
@@ -118,26 +112,26 @@ class EventList extends Component {
     return (
       <>
         <Typography align="center" variant="h2">
-          Event Lobby
+          Room Lobby
         </Typography>
-        <Button variant="contained" onClick={this.eventFormOpen}>
-          Create new event
+        <Button variant="contained" onClick={this.roomFormOpen}>
+          Create new room
         </Button>
 
-        <Modal open={this.state.openEventForm} onClose={this.eventFormClose}>
-          <CreateEventForm onEventFormSubmit={this.onEventFormSubmit} />
+        <Modal open={this.state.openRoomForm} onClose={this.roomFormClose}>
+          <CreateRoomForm onRoomFormSubmit={this.onRoomFormSubmit} />
         </Modal>
 
         <div>
-          {this.state.loadingEvents ? (
+          {this.state.loadingRooms ? (
             <Container className={classes.loading}>
               <CircularProgress />
             </Container>
           ) : (
-            this.state.eventData.map((data) => {
+            this.state.roomListData.map((data) => {
               return (
                 <React.Fragment key={data.id}>
-                  <Event deleteEvent={this.deleteEvent} apiData={data} />
+                  <Room deleteRoom={this.deleteRoom} apiData={data} />
                 </React.Fragment>
               );
             })
@@ -147,4 +141,4 @@ class EventList extends Component {
     );
   }
 }
-export default withStyles(styles)(EventList);
+export default withStyles(styles)(RoomList);

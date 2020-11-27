@@ -1,21 +1,17 @@
 import React, { Component } from "react";
 import { Formik, Form } from "formik";
 
-// Components
-import ScheduleInputFields from "./ScheduleInputFields";
-import eventValidationSchema from "./event-validation-schema";
-
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import Paper from "@material-ui/core/Paper";
 import Container from "@material-ui/core/Container";
-import Switch from "@material-ui/core/Switch";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Grid from "@material-ui/core/Grid";
 import { withStyles } from "@material-ui/core/styles";
 
-import FormikUIField from "../../authentication/FormikUIField";
-import FormikUISelect from "../../authentication/FormikUISelect";
+// Components
+import roomFormValidationSchema from "../../utilities/roomForms_validation_schema";
+import FormikUIField from "../../utilities/form_fields/FormikUIField";
+import FormikUISelect from "../../utilities/form_fields/FormikUISelect";
 
 const styles = {
   submitBtn: {
@@ -23,11 +19,11 @@ const styles = {
   },
 };
 
-class CreateEventForm extends Component {
+class CreateRoomForm extends Component {
   constructor(props) {
     super(props);
 
-    this.eventTypes = [
+    this.roomTypes = [
       {
         value: "OTA",
         label: "Open to all",
@@ -49,17 +45,9 @@ class CreateEventForm extends Component {
       title: "",
       description: "",
       typeOf: "OTA",
-      isScheduled: false,
-      schedules: [
-        {
-          date: "",
-          timeStartsAt: "",
-          timeEndsAt: "",
-        },
-      ],
     };
 
-    const { classes } = this.props;
+    const { classes, onRoomFormSubmit } = this.props;
 
     return (
       <Container maxWidth="sm">
@@ -67,13 +55,13 @@ class CreateEventForm extends Component {
           <Container>
             <Formik
               initialValues={initialValues}
-              onSubmit={this.props.onEventFormSubmit}
-              validationSchema={eventValidationSchema}
+              onSubmit={onRoomFormSubmit}
+              validationSchema={roomFormValidationSchema}
             >
-              {({ values, isValid, dirty }) => (
+              {({ isValid, dirty }) => (
                 <Form>
                   <Typography align="center" variant="h4">
-                    Create Event
+                    Create Room
                   </Typography>
                   <FormikUIField
                     name="title"
@@ -94,31 +82,10 @@ class CreateEventForm extends Component {
                   <FormikUISelect
                     name="typeOf"
                     label="Event type"
-                    items={this.eventTypes}
+                    items={this.roomTypes}
                     required
                   />
 
-                  <FormControlLabel
-                    label="Schedule event"
-                    control={
-                      <FormikUIField
-                        name="isScheduled"
-                        type="checkbox"
-                        MUComponent={Switch}
-                      />
-                    }
-                  >
-                    Schedule event
-                  </FormControlLabel>
-
-                  <div>
-                    {values.isScheduled ? (
-                      <ScheduleInputFields
-                        name="schedules"
-                        schedules={values.schedules}
-                      />
-                    ) : null}
-                  </div>
                   <Grid container direction="row" justify="center">
                     <Button
                       disabled={!dirty || !isValid}
@@ -126,7 +93,7 @@ class CreateEventForm extends Component {
                       variant="contained"
                       type="submit"
                     >
-                      Create Event
+                      Create Room
                     </Button>
                   </Grid>
                 </Form>
@@ -138,4 +105,4 @@ class CreateEventForm extends Component {
     );
   }
 }
-export default withStyles(styles)(CreateEventForm);
+export default withStyles(styles)(CreateRoomForm);

@@ -6,11 +6,9 @@ import Container from "@material-ui/core/Container";
 class App extends React.Component {
   render() {
     return (
-      <>
-        <Container>
-          <Routes />
-        </Container>
-      </>
+      <Container>
+        <Routes />
+      </Container>
     );
   }
 }

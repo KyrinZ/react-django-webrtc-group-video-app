@@ -9,9 +9,10 @@ import Container from "@material-ui/core/Container";
 import Typography from "@material-ui/core/Typography";
 import { withStyles } from "@material-ui/core/styles";
 
-import FormikUIField from "./FormikUIField";
-import { registerValidationSchema } from "./auth-validation-schema";
-import axiosInstance from "./axios";
+// Components
+import FormikUIField from "../utilities/form_fields/FormikUIField";
+import { registerValidationSchema } from "../utilities/authForms_validation_schema";
+import axiosInstance from "../utilities/axios";
 
 const styles = (theme) => ({
   paper: {

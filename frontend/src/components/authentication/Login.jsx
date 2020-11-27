@@ -1,16 +1,18 @@
 import React, { Component } from "react";
 import { Formik, Form } from "formik";
+
 // Material UI components
-import { withStyles } from "@material-ui/core/styles";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import Button from "@material-ui/core/Button";
 import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
+import { withStyles } from "@material-ui/core/styles";
 
-import FormikUIField from "./FormikUIField";
-import { loginValidationSchema } from "./auth-validation-schema";
-import axiosInstance from "./axios";
+// Components
+import FormikUIField from "../utilities/form_fields/FormikUIField";
+import { loginValidationSchema } from "../utilities/authForms_validation_schema";
+import axiosInstance from "../utilities/axios";
 
 const styles = (theme) => ({
   paper: {

@@ -6,33 +6,31 @@ import Grid from "@material-ui/core/Grid";
 import AppBar from "@material-ui/core/AppBar";
 import Button from "@material-ui/core/Button";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
-import { withStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import Container from "@material-ui/core/Container";
+import { withStyles } from "@material-ui/core/styles";
 
 const styles = {
-  eventHeading: {
+  roomHeading: {
     marginTop: "1rem",
     padding: "0.5rem",
   },
-  eventDescription: {
+  roomDescription: {
     padding: "0.5rem",
   },
 };
 
-class Event extends Component {
+class Room extends Component {
   constructor(props) {
     super(props);
-    this.renderEventType = this.renderEventType.bind(this);
+    this.renderRoomType = this.renderRoomType.bind(this);
   }
 
-  renderEventType(eventTypeKeyWord) {
+  renderRoomType(eventTypeKeyWord) {
     if (eventTypeKeyWord === "OTA") {
       return "Open to All";
     } else if (eventTypeKeyWord === "IO") {
       return "Invite only";
-    } else if (eventTypeKeyWord === "RO") {
-      return "Register only";
     } else if (eventTypeKeyWord === "L") {
       return "Locked";
     } else {
@@ -42,59 +40,36 @@ class Event extends Component {
 
   render() {
     const {
-      apiData: {
-        id,
-        title,
-        description,
-        typeOf,
-        isScheduled,
-        eventSchedule,
-        eventStatus,
-        createdOn,
-      },
+      apiData: { id, title, description, typeOf, createdOn },
       classes,
+      deleteRoom,
     } = this.props;
     return (
       <Paper elevation={3}>
-        <AppBar className={classes.eventHeading} position="static">
+        <AppBar className={classes.roomHeading} position="static">
           <Container>
             <Grid container direction="row" justify="space-between">
               <Grid item>{title}</Grid>
-              <Grid item>{this.renderEventType(typeOf)}</Grid>
-              <Grid item>{eventStatus}</Grid>
+              <Grid item>{this.renderRoomType(typeOf)}</Grid>
             </Grid>
           </Container>
         </AppBar>
 
         <Container>
-          <Grid className={classes.eventDescription}>
-            <Grid className={classes.eventDescription}>
+          <Grid className={classes.roomDescription}>
+            <Grid className={classes.roomDescription}>
               <Typography variant="h4">{title}</Typography>
-              {isScheduled
-                ? eventSchedule.map((data) => {
-                    const { id, date, timeStartsAt, timeEndsAt } = data;
-                    return (
-                      <Typography variant="subtitle1" key={id}>
-                        On {date}, starts from {timeStartsAt} to {timeEndsAt}
-                      </Typography>
-                    );
-                  })
-                : null}
-
               <Typography variant="subtitle2">{createdOn}</Typography>
               <Typography variant="body1">{description}</Typography>
             </Grid>
 
             <Grid container direction="row" justify="space-around">
               <ButtonGroup variant="contained">
-                <Button
-                  color="secondary"
-                  onClick={() => this.props.deleteEvent(id)}
-                >
-                  Delete Event
+                <Button color="secondary" onClick={() => deleteRoom(id)}>
+                  Delete Room
                 </Button>
 
-                <Button color="primary">Enter Event</Button>
+                <Button color="primary">Enter Room</Button>
               </ButtonGroup>
             </Grid>
           </Grid>
@@ -103,4 +78,4 @@ class Event extends Component {
     );
   }
 }
-export default withStyles(styles)(Event);
+export default withStyles(styles)(Room);

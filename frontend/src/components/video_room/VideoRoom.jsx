@@ -1,14 +1,15 @@
 import React, { Component } from "react";
 import Peer from "simple-peer";
-
-import Video from "./Video";
-import Button from "@material-ui/core/Button";
-
 import jwt_decode from "jwt-decode";
 
-const WEBSOCKET_URL = "ws://127.0.0.1:8000/video/ROOM/";
+// Material UI components
+import Button from "@material-ui/core/Button";
 
-export class EventRoom extends Component {
+// Components
+import Video from "./Video";
+
+const WEBSOCKET_URL = "ws://127.0.0.1:8000/video/ROOM/";
+export class VideoRoom extends Component {
   constructor(props) {
     super(props);
 
@@ -207,4 +208,4 @@ export class EventRoom extends Component {
   }
 }
 
-export default EventRoom;
+export default VideoRoom;

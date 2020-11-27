@@ -1,6 +1,8 @@
-import { EventList } from "./lobby";
-import { Login, Register } from "./authentication";
+import VideoRoom from "./video_room/VideoRoom";
+import RoomList from "./lobby/RoomList";
+import Login from "./authentication/Login";
+import Register from "./authentication/Register";
 import Nav from "./Nav";
-import { axiosInstance } from "./authentication";
+import axiosInstance from "../components/utilities/axios";
 
-export { Nav, EventList, Login, Register, axiosInstance };
+export { Nav, RoomList, Login, Register, axiosInstance, VideoRoom };
