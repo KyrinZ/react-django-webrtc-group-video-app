@@ -5,67 +5,44 @@ import {
   Route,
   Redirect,
 } from "react-router-dom";
-import jwt_decode from "jwt-decode";
 
 // Components
 import { Nav, RoomList, VideoRoom, Login, Register } from "./components";
-
-import { axiosInstance } from "./components";
+import isUserAuthenticate from "./components/utilities/authenticate_user";
 
 export class Routes extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      loggedInStatus: false,
-      userId: null,
-    };
-
-    this.checkLogInStatus = this.checkLogInStatus.bind(this);
     this.navigationBar = this.navigationBar.bind(this);
+    this.lobbyPage = this.lobbyPage.bind(this);
     this.loginPage = this.loginPage.bind(this);
     this.registerPage = this.registerPage.bind(this);
+
+    this.state = {
+      userData: isUserAuthenticate(),
+    };
   }
 
-  checkLogInStatus = () => {
-    const refreshToken = localStorage.getItem("refresh_token");
-    axiosInstance
-      .post("token/verify/", {
-        token: refreshToken,
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          const userId = jwt_decode(refreshToken).user_id;
-          this.setState({
-            loggedInStatus: true,
-            userId: userId,
-          });
-
-          console.log("User is logged in now");
-        }
-      })
-      .catch((error) => {
-        this.setState({
-          loggedInStatus: false,
-          userId: null,
-        });
-        console.log(error.message);
-        console.log("User is not logged in or register yet");
-      });
-  };
-
   navigationBar = (props) => {
+    const { isUserLoggedIn } = this.state;
+    let menuItems;
+    if (isUserLoggedIn) {
+      menuItems = ["Lobby", "My Account", "Logout"];
+    } else {
+      menuItems = ["Lobby", "Login", "Register"];
+    }
     return (
-      <Nav
-        checkLogInStatus={this.checkLogInStatus}
-        loggedInStatus={this.state.loggedInStatus}
-        {...props}
-      />
+      <Nav menuItems={menuItems} isUserLoggedIn={isUserLoggedIn} {...props} />
     );
   };
 
+  lobbyPage = (props) => {
+    const { isUserLoggedIn } = this.state;
+    return <RoomList isUserLoggedIn={isUserLoggedIn} {...props} />;
+  };
   loginPage = () => {
-    return this.state.loggedInStatus ? (
+    return this.state.isUserLoggedIn ? (
       <Redirect to="/" exact />
     ) : (
       <Login checkLogInStatus={this.checkLogInStatus} />
@@ -73,16 +50,16 @@ export class Routes extends Component {
   };
 
   registerPage = () => {
-    return this.state.loggedInStatus ? (
+    return this.state.isUserLoggedIn ? (
       <Redirect to="/" exact />
     ) : (
       <Register checkLogInStatus={this.checkLogInStatus} />
     );
   };
 
-  componentDidMount = () => {
-    this.checkLogInStatus();
-  };
+  // componentDidMount = () => {
+  //   this.checkLogInStatus();
+  // };
 
   render() {
     return (
@@ -90,7 +67,7 @@ export class Routes extends Component {
         <Router>
           <Route render={this.navigationBar} />
           <Switch>
-            <Route exact path="/" component={RoomList} />
+            <Route exact path="/" render={this.lobbyPage} />
             <Route exact path="/login" render={this.loginPage} />
             <Route exact path="/register" render={this.registerPage} />
             <Route exact path="/event/room" component={VideoRoom} />

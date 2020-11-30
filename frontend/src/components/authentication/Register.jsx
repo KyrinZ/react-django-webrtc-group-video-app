@@ -7,15 +7,18 @@ import Button from "@material-ui/core/Button";
 import Paper from "@material-ui/core/Paper";
 import Container from "@material-ui/core/Container";
 import Typography from "@material-ui/core/Typography";
+import Grid from "@material-ui/core/Grid";
 import { withStyles } from "@material-ui/core/styles";
 
 // Components
 import FormikUIField from "../utilities/form_fields/FormikUIField";
 import { registerValidationSchema } from "../utilities/authForms_validation_schema";
 import axiosInstance from "../utilities/axios";
+import RouterUILink from "../utilities/RouterUILink";
 
 const styles = (theme) => ({
   paper: {
+    marginTop: theme.spacing(4),
     padding: theme.spacing(3),
     textAlign: "center",
     color: theme.palette.text.primary,
@@ -23,6 +26,9 @@ const styles = (theme) => ({
   },
   button: {
     margin: theme.spacing(3),
+  },
+  input: {
+    display: "inline-block",
   },
 });
 
@@ -35,7 +41,7 @@ class Register extends Component {
     this.onSubmitRegisterForm = this.onSubmitRegisterForm.bind(this);
   }
   onSubmitRegisterForm(data, { resetForm }) {
-    const jsonData = {
+    const userData = {
       email: data.email,
       firstName: data.firstName,
       lastName: data.lastName,
@@ -43,19 +49,27 @@ class Register extends Component {
     };
 
     axiosInstance
-      .post("user/create/", jsonData)
-      .then((response) => {
-        axiosInstance.defaults.headers["Authorization"] =
-          "Bearer " + response.data.tokens.access;
-        localStorage.setItem("access_token", response.data.tokens.access);
-        localStorage.setItem("refresh_token", response.data.tokens.refresh);
+      .post("user/create/", userData)
+      .then(
+        ({
+          data: {
+            tokens: { access, refresh },
+          },
+        }) => {
+          axiosInstance.defaults.headers["Authorization"] = "Bearer " + access;
+          localStorage.setItem("access_token", access);
+          localStorage.setItem("refresh_token", refresh);
 
-        this.props.checkLogStatus();
-      })
+          this.props.checkLogInStatus();
+        }
+      )
       .catch((error) => {
-        this.setState({
-          serverErrors: Object.values(error.response.data),
-        });
+        console.log(error.message);
+        if (error.response) {
+          this.setState({
+            serverErrors: Object.values(error.response.data),
+          });
+        }
       });
 
     resetForm();
@@ -80,47 +94,45 @@ class Register extends Component {
               onSubmit={this.onSubmitRegisterForm}
               validationSchema={registerValidationSchema}
             >
-              {({ dirty, isValid }) => (
+              {({ dirty, isValid, errors, touched }) => (
                 <Form>
-                  <Typography align="center" variant="h2">
+                  <Typography align="center" variant="h3">
                     Register
                   </Typography>
 
-                  <FormikUIField
-                    name="firstName"
-                    label="First Name"
-                    type="text"
-                    fullWidth
-                    required
-                    error={!isValid}
-                  />
+                  <Grid container justify="space-between">
+                    <FormikUIField
+                      name="firstName"
+                      label="First Name"
+                      type="text"
+                      required
+                      error={errors.firstName && touched.firstName}
+                    />
 
-                  <FormikUIField
-                    name="lastName"
-                    label="Last Name"
-                    type="text"
-                    fullWidth
-                    required
-                    error={!isValid}
-                  />
-
+                    <FormikUIField
+                      name="lastName"
+                      label="Last Name"
+                      type="text"
+                      required
+                      error={errors.lastName && touched.lastName}
+                    />
+                  </Grid>
                   <FormikUIField
                     name="email"
                     label="Email"
                     type="email"
                     fullWidth
                     required
-                    error={!isValid}
+                    error={errors.email && touched.email}
                   />
 
-                  {/* Gotta remember the warning about the password, I will sure remember to add SSL */}
                   <FormikUIField
                     name="password"
                     label="Password"
                     type="password"
                     fullWidth
                     required
-                    error={!isValid}
+                    error={errors.password && touched.password}
                   />
 
                   <FormikUIField
@@ -129,7 +141,7 @@ class Register extends Component {
                     type="password"
                     fullWidth
                     required
-                    error={!isValid}
+                    error={errors.confirmation && touched.confirmation}
                   />
 
                   {this.state.serverErrors
@@ -147,8 +159,12 @@ class Register extends Component {
                     color="primary"
                     disabled={!dirty || !isValid}
                   >
-                    Login
+                    Register
                   </Button>
+                  <Typography display="block" variant="caption">
+                    already have an account?
+                    <RouterUILink linkTo="/login" innerText="Log In" />
+                  </Typography>
                 </Form>
               )}
             </Formik>

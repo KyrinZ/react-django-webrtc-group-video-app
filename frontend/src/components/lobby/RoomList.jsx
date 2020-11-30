@@ -51,15 +51,7 @@ class RoomList extends Component {
           loadingRooms: true,
         });
 
-        axiosInstance
-          .get("events/")
-          .then((res) => {
-            this.setState(() => ({
-              roomListData: res.data,
-              loadingRooms: false,
-            }));
-          })
-          .catch((error) => console.log(error.message));
+        this.loadRooms();
       })
       .catch((error) => console.log(error.message));
   }
@@ -71,15 +63,7 @@ class RoomList extends Component {
         this.setState({
           loadingRooms: true,
         });
-        axiosInstance
-          .get("events/")
-          .then((res) => {
-            this.setState(() => ({
-              roomListData: res.data,
-              loadingRooms: false,
-            }));
-          })
-          .catch((error) => console.log(error.message));
+        this.loadRooms();
       })
       .catch((error) => console.log(error.message));
   }
@@ -95,7 +79,7 @@ class RoomList extends Component {
     });
   }
 
-  componentDidMount() {
+  loadRooms() {
     axiosInstance
       .get("events/")
       .then((res) => {
@@ -103,8 +87,13 @@ class RoomList extends Component {
       })
       .catch((error) => {
         this.setState(() => ({ loadingRooms: false }));
-        console.log(error.message);
+        console.log("eventroom");
+        console.log(error.response);
       });
+  }
+
+  componentDidMount() {
+    this.loadRooms();
   }
 
   render() {

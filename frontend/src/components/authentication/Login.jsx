@@ -13,9 +13,11 @@ import { withStyles } from "@material-ui/core/styles";
 import FormikUIField from "../utilities/form_fields/FormikUIField";
 import { loginValidationSchema } from "../utilities/authForms_validation_schema";
 import axiosInstance from "../utilities/axios";
+import RouterUILink from "../utilities/RouterUILink";
 
 const styles = (theme) => ({
   paper: {
+    marginTop: theme.spacing(4),
     padding: theme.spacing(3),
     textAlign: "center",
     color: theme.palette.text.primary,
@@ -49,7 +51,7 @@ class Login extends Component {
         localStorage.setItem("access_token", res.data.access);
         localStorage.setItem("refresh_token", res.data.refresh);
 
-        this.props.checkLogStatus();
+        this.props.checkLogInStatus();
       })
       .catch((error) => {
         this.setState({
@@ -73,9 +75,9 @@ class Login extends Component {
               onSubmit={this.onSubmitLoginForm}
               validationSchema={loginValidationSchema}
             >
-              {({ dirty, isValid }) => (
+              {({ dirty, isValid, errors, touched }) => (
                 <Form>
-                  <Typography align="center" variant="h2">
+                  <Typography align="center" variant="h3">
                     Login
                   </Typography>
                   <FormikUIField
@@ -84,17 +86,16 @@ class Login extends Component {
                     type="email"
                     fullWidth
                     required
-                    error={!isValid}
+                    error={errors.email && touched.email}
                   />
 
-                  {/* Gotta remember the warning about the password, I will sure remember to add SSL */}
                   <FormikUIField
                     name="password"
                     label="Password"
                     type="password"
                     fullWidth
                     required
-                    error={!isValid}
+                    error={errors.password && touched.password}
                   />
 
                   {/* Server side error */}
@@ -115,6 +116,10 @@ class Login extends Component {
                   >
                     Login
                   </Button>
+                  <Typography display="block" variant="caption">
+                    not a member?
+                    <RouterUILink linkTo="/register" innerText="Register" />
+                  </Typography>
                 </Form>
               )}
             </Formik>

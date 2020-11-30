@@ -12,6 +12,7 @@ let registerValidationSchema = yup.object().shape({
   password: yup.string().min(8).required(),
   confirmation: yup
     .string()
-    .oneOf([yup.ref("password"), null], "Passwords must match"),
+    .oneOf([yup.ref("password"), null], "Passwords must match")
+    .required(),
 });
 export { registerValidationSchema, loginValidationSchema };
