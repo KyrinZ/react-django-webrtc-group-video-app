@@ -28,29 +28,10 @@ const styles = (theme) => ({
 export class Nav extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
       anchorEl: null,
-      navTitle: this.determineNavTitle(),
     };
   }
-
-  determineNavTitle = () => {
-    const { location } = this.props;
-    switch (location.pathname) {
-      case "/":
-        return "Lobby";
-      case "/login":
-        return "Login";
-      case "/register":
-        return "Register";
-
-      case "My Account":
-        return "My Account";
-      default:
-        return "404";
-    }
-  };
 
   handleClick = (event) => {
     this.setState({
@@ -59,47 +40,67 @@ export class Nav extends Component {
   };
 
   gotoSection = (event) => {
-    const { history } = this.props;
+    const {
+      history,
+      availablePaths,
+      availablePathTitles,
+      authenticateUser,
+    } = this.props;
     const { menu } = event.currentTarget.dataset;
+    const {
+      LOBBY_PATH,
+      LOGIN_PATH,
+      REGISTER_PATH,
+      USER_PROFILE_PATH,
+    } = availablePaths;
+    const {
+      LOBBY_TITLE,
+      LOGIN_TITLE,
+      REGISTER_TITLE,
+      USER_PROFILE_TITLE,
+      LOGOUT_TITLE,
+    } = availablePathTitles;
     if (menu && history) {
       switch (menu) {
-        case "Lobby":
-          history.push("/");
+        case LOBBY_TITLE:
+          history.push(LOBBY_PATH);
           break;
-        case "Login":
-          history.push("/login");
+        case LOGIN_TITLE:
+          history.push(LOGIN_PATH);
           break;
-        case "Register":
-          history.push("/register");
+        case REGISTER_TITLE:
+          history.push(REGISTER_PATH);
           break;
-        case "My Account":
-          history.push("/my-account");
+        case USER_PROFILE_TITLE:
+          history.push(USER_PROFILE_PATH);
           break;
-        case "Logout":
-          history.push("/");
+        case LOGOUT_TITLE:
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          authenticateUser();
+          history.push(LOBBY_PATH);
           break;
-
         default:
           break;
       }
-      this.setState({
-        navTitle: menu,
-      });
     }
     this.setState({
       anchorEl: null,
     });
   };
+  componentDidMount = () => {
+    this.props.changePageTitle();
+  };
 
   render() {
-    const { classes, menuItems } = this.props;
-    const { anchorEl, navTitle } = this.state;
+    const { classes, menuItems, pageTitle } = this.props;
+    const { anchorEl } = this.state;
     return (
       <div className={classes.root}>
         <AppBar position="static">
           <Toolbar>
             <Typography variant="h6" className={classes.title}>
-              {navTitle}
+              {pageTitle}
             </Typography>
             <Typography className={classes.username} variant="subtitle1">
               Anonymous
@@ -108,7 +109,6 @@ export class Nav extends Component {
               <MenuIcon />
             </IconButton>
             <Menu
-              id="simple-menu"
               anchorEl={anchorEl}
               anchorOrigin={{ vertical: "top", horizontal: "right" }}
               transformOrigin={{ vertical: "top", horizontal: "right" }}

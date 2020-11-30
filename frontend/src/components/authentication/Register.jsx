@@ -25,7 +25,8 @@ const styles = (theme) => ({
     borderRadius: "1rem",
   },
   button: {
-    margin: theme.spacing(3),
+    marginTop: theme.spacing(3),
+    marginBottom: theme.spacing(2),
   },
   input: {
     display: "inline-block",
@@ -47,22 +48,18 @@ class Register extends Component {
       lastName: data.lastName,
       password: data.password,
     };
-
+    const { history, redirectPath, authenticateUser } = this.props;
     axiosInstance
       .post("user/create/", userData)
-      .then(
-        ({
-          data: {
-            tokens: { access, refresh },
-          },
-        }) => {
-          axiosInstance.defaults.headers["Authorization"] = "Bearer " + access;
-          localStorage.setItem("access_token", access);
-          localStorage.setItem("refresh_token", refresh);
+      .then(({ data: { tokens } }) => {
+        axiosInstance.defaults.headers["Authorization"] =
+          "Bearer " + tokens.access;
+        localStorage.setItem("access_token", tokens.access);
+        localStorage.setItem("refresh_token", tokens.refresh);
 
-          this.props.checkLogInStatus();
-        }
-      )
+        authenticateUser();
+        history.push(redirectPath);
+      })
       .catch((error) => {
         console.log(error.message);
         if (error.response) {
@@ -153,6 +150,7 @@ class Register extends Component {
                     : null}
 
                   <Button
+                    fullWidth
                     className={classes.button}
                     type="submit"
                     variant="contained"

@@ -24,7 +24,8 @@ const styles = (theme) => ({
     borderRadius: "1rem",
   },
   button: {
-    margin: theme.spacing(3),
+    marginTop: theme.spacing(3),
+    marginBottom: theme.spacing(2),
   },
 });
 
@@ -38,25 +39,28 @@ class Login extends Component {
   }
 
   onSubmitLoginForm(data) {
-    const jsonData = {
+    const userData = {
       email: data.email,
       password: data.password,
     };
-
+    const { history, redirectPath, authenticateUser } = this.props;
     axiosInstance
-      .post("token/", jsonData)
-      .then((res) => {
+      .post("token/", userData)
+      .then(({ data }) => {
         axiosInstance.defaults.headers["Authorization"] =
-          "Bearer " + res.data.access;
-        localStorage.setItem("access_token", res.data.access);
-        localStorage.setItem("refresh_token", res.data.refresh);
-
-        this.props.checkLogInStatus();
+          "Bearer " + data.access;
+        localStorage.setItem("access_token", data.access);
+        localStorage.setItem("refresh_token", data.refresh);
+        authenticateUser();
+        history.push(redirectPath);
       })
       .catch((error) => {
-        this.setState({
-          serverErrors: Object.values(error.response.data),
-        });
+        console.log(error.message);
+        if (error.response) {
+          this.setState({
+            serverErrors: Object.values(error.response.data),
+          });
+        }
       });
   }
 
@@ -108,6 +112,7 @@ class Login extends Component {
                     : null}
 
                   <Button
+                    fullWidth
                     className={classes.button}
                     type="submit"
                     variant="contained"

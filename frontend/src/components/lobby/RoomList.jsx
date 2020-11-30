@@ -11,7 +11,7 @@ import { withStyles } from "@material-ui/core/styles";
 // Components
 import Room from "./Room";
 import CreateRoomForm from "./RoomForm/CreateRoomForm";
-import axiosInstance from "../utilities/axios";
+import axiosInstance, { getRoomsList } from "../utilities/axios";
 
 const styles = {
   loading: {
@@ -80,15 +80,13 @@ class RoomList extends Component {
   }
 
   loadRooms() {
-    axiosInstance
-      .get("events/")
+    getRoomsList(axiosInstance)
       .then((res) => {
         this.setState(() => ({ roomListData: res.data, loadingRooms: false }));
       })
       .catch((error) => {
         this.setState(() => ({ loadingRooms: false }));
-        console.log("eventroom");
-        console.log(error.response);
+        console.log(error.message);
       });
   }
 
