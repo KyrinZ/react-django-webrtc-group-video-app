@@ -130,7 +130,12 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 
-CORS_ALLOWED_ORIGINS = ["http://192.168.8.101:3000", "http://localhost:3000"]
+# CORS_ALLOWED_ORIGINS = [
+#     "http://192.168.8.101:3000",
+#     "http://localhost:3000",
+#     "https://16f4d36c56f3.ngrok.io",
+# ]
+CORS_ALLOW_ALL_ORIGINS = True
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [

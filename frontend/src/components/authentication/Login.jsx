@@ -43,7 +43,12 @@ class Login extends Component {
       email: data.email,
       password: data.password,
     };
-    const { history, redirectPath, authenticateUser } = this.props;
+    const {
+      history,
+      redirectPath,
+      authenticateUser,
+      printFeedback,
+    } = this.props;
     axiosInstance
       .post("token/", userData)
       .then(({ data }) => {
@@ -53,6 +58,7 @@ class Login extends Component {
         localStorage.setItem("refresh_token", data.refresh);
         authenticateUser();
         history.push(redirectPath);
+        printFeedback({ type: "success", feedbackMsg: "You are logged in" });
       })
       .catch((error) => {
         console.log(error.message);

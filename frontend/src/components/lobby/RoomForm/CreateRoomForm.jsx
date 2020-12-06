@@ -15,7 +15,7 @@ import FormikUISelect from "../../utilities/form_fields/FormikUISelect";
 
 const styles = {
   submitBtn: {
-    margin: "1rem",
+    margin: "1rem 0",
   },
 };
 
@@ -58,7 +58,7 @@ class CreateRoomForm extends Component {
               onSubmit={onRoomFormSubmit}
               validationSchema={roomFormValidationSchema}
             >
-              {({ isValid, dirty }) => (
+              {({ isValid, dirty, errors, touched }) => (
                 <Form>
                   <Typography align="center" variant="h4">
                     Create Room
@@ -69,7 +69,7 @@ class CreateRoomForm extends Component {
                     type="text"
                     required
                     fullWidth
-                    error={!isValid}
+                    error={errors.title || touched.title}
                   />
                   <FormikUIField
                     name="description"
@@ -83,11 +83,13 @@ class CreateRoomForm extends Component {
                     name="typeOf"
                     label="Event type"
                     items={this.roomTypes}
+                    error={errors.typeOf || touched.typeOf}
                     required
                   />
 
                   <Grid container direction="row" justify="center">
                     <Button
+                      fullWidth
                       disabled={!dirty || !isValid}
                       className={classes.submitBtn}
                       variant="contained"

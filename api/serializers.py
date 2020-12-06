@@ -48,4 +48,4 @@ class RoomSerializer(serializers.ModelSerializer):
         ]
 
     def get_room_id(self, obj):
-        return "room-" + str(obj.id)
+        return "room" + str(obj.id)

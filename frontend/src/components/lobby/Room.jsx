@@ -3,22 +3,28 @@ import React, { Component } from "react";
 // Material UI components
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
-import AppBar from "@material-ui/core/AppBar";
 import Button from "@material-ui/core/Button";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
-import Paper from "@material-ui/core/Paper";
-import Container from "@material-ui/core/Container";
+import Accordion from "@material-ui/core/Accordion";
+import AccordionSummary from "@material-ui/core/AccordionSummary";
+import AccordionDetails from "@material-ui/core/AccordionDetails";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { withStyles } from "@material-ui/core/styles";
 
-const styles = {
-  roomHeading: {
-    marginTop: "1rem",
-    padding: "0.5rem",
+const styles = (theme) => ({
+  root: {
+    width: "100%",
   },
-  roomDescription: {
-    padding: "0.5rem",
+  heading: {
+    fontSize: theme.typography.pxToRem(15),
+    flexBasis: "33.33%",
+    flexShrink: 0,
   },
-};
+  secondaryHeading: {
+    fontSize: theme.typography.pxToRem(15),
+    color: theme.palette.text.secondary,
+  },
+});
 
 class Room extends Component {
   constructor(props) {
@@ -40,41 +46,44 @@ class Room extends Component {
 
   render() {
     const {
-      apiData: { id, title, description, typeOf, createdOn },
+      apiData: { id, title, description, typeOf, createdOn, roomId },
       classes,
       deleteRoom,
+      enterRoom,
     } = this.props;
     return (
-      <Paper elevation={3}>
-        <AppBar className={classes.roomHeading} position="static">
-          <Container>
-            <Grid container direction="row" justify="space-between">
-              <Grid item>{title}</Grid>
-              <Grid item>{this.renderRoomType(typeOf)}</Grid>
-            </Grid>
-          </Container>
-        </AppBar>
-
-        <Container>
-          <Grid className={classes.roomDescription}>
-            <Grid className={classes.roomDescription}>
-              <Typography variant="h4">{title}</Typography>
-              <Typography variant="subtitle2">{createdOn}</Typography>
-              <Typography variant="body1">{description}</Typography>
-            </Grid>
-
-            <Grid container direction="row" justify="space-around">
-              <ButtonGroup variant="contained">
+      <Accordion>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography className={classes.heading}>{title}</Typography>
+          <Typography className={classes.secondaryHeading}>
+            {this.renderRoomType(typeOf)}
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Grid container justify="space-between">
+            <div>
+              <Grid container direction="column">
+                <Typography gutterBottom variant="h5">
+                  {title}
+                </Typography>
+                <Typography variant="subtitle2">{createdOn}</Typography>
+                <Typography variant="body1">{description}</Typography>
+              </Grid>
+            </div>
+            <div>
+              <ButtonGroup orientation="vertical" variant="contained">
                 <Button color="secondary" onClick={() => deleteRoom(id)}>
                   Delete Room
                 </Button>
 
-                <Button color="primary">Enter Room</Button>
+                <Button onClick={() => enterRoom(roomId)} color="primary">
+                  Enter Room
+                </Button>
               </ButtonGroup>
-            </Grid>
+            </div>
           </Grid>
-        </Container>
-      </Paper>
+        </AccordionDetails>
+      </Accordion>
     );
   }
 }

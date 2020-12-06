@@ -48,7 +48,12 @@ class Register extends Component {
       lastName: data.lastName,
       password: data.password,
     };
-    const { history, redirectPath, authenticateUser } = this.props;
+    const {
+      history,
+      redirectPath,
+      authenticateUser,
+      printFeedback,
+    } = this.props;
     axiosInstance
       .post("user/create/", userData)
       .then(({ data: { tokens } }) => {
@@ -59,6 +64,10 @@ class Register extends Component {
 
         authenticateUser();
         history.push(redirectPath);
+        printFeedback({
+          type: "success",
+          feedbackMsg: "You are registered and logged in",
+        });
       })
       .catch((error) => {
         console.log(error.message);

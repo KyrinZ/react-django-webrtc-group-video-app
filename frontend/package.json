@@ -13,7 +13,6 @@
     "fontsource-roboto": "^3.0.3",
     "formik": "^2.2.1",
     "jwt-decode": "^3.1.2",
-    "moment": "^2.29.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-router-dom": "^5.2.0",

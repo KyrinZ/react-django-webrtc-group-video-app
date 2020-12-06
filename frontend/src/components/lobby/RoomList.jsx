@@ -2,8 +2,6 @@ import React, { Component } from "react";
 
 // Material UI components
 import Modal from "@material-ui/core/Modal";
-import Typography from "@material-ui/core/Typography";
-import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Container from "@material-ui/core/Container";
 import { withStyles } from "@material-ui/core/styles";
@@ -14,6 +12,9 @@ import CreateRoomForm from "./RoomForm/CreateRoomForm";
 import axiosInstance, { getRoomsList } from "../utilities/axios";
 
 const styles = {
+  roomList: {
+    marginTop: "1rem",
+  },
   loading: {
     textAlign: "center",
   },
@@ -36,11 +37,12 @@ class RoomList extends Component {
 
   onRoomFormSubmit(data, { resetForm }) {
     const jsonData = {
+      user: 2,
       title: data.title,
       description: data.description,
       typeOf: data.typeOf,
     };
-
+    const { printFeedback } = this.props;
     axiosInstance
       .post("events/", jsonData)
       .then(() => {
@@ -50,7 +52,7 @@ class RoomList extends Component {
           openRoomForm: false,
           loadingRooms: true,
         });
-
+        printFeedback({ type: "success", feedbackMsg: "Room created" });
         this.loadRooms();
       })
       .catch((error) => console.log(error.message));
@@ -68,6 +70,11 @@ class RoomList extends Component {
       .catch((error) => console.log(error.message));
   }
 
+  enterRoom = (roomId) => {
+    const { history } = this.props;
+    history.push(`/video/${roomId}`);
+  };
+
   roomFormClose() {
     this.setState({
       openRoomForm: false,
@@ -80,12 +87,14 @@ class RoomList extends Component {
   }
 
   loadRooms() {
+    const { printFeedback } = this.props;
     getRoomsList(axiosInstance)
       .then((res) => {
         this.setState(() => ({ roomListData: res.data, loadingRooms: false }));
       })
       .catch((error) => {
         this.setState(() => ({ loadingRooms: false }));
+        printFeedback({ type: "error", feedbackMsg: error.message });
         console.log(error.message);
       });
   }
@@ -95,21 +104,14 @@ class RoomList extends Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, closeRoomForm, isRoomFormOpen } = this.props;
     return (
       <>
-        <Typography align="center" variant="h2">
-          Room Lobby
-        </Typography>
-        <Button variant="contained" onClick={this.roomFormOpen}>
-          Create new room
-        </Button>
-
-        <Modal open={this.state.openRoomForm} onClose={this.roomFormClose}>
+        <Modal open={isRoomFormOpen} onClose={closeRoomForm}>
           <CreateRoomForm onRoomFormSubmit={this.onRoomFormSubmit} />
         </Modal>
 
-        <div>
+        <div className={classes.roomList}>
           {this.state.loadingRooms ? (
             <Container className={classes.loading}>
               <CircularProgress />
@@ -118,7 +120,11 @@ class RoomList extends Component {
             this.state.roomListData.map((data) => {
               return (
                 <React.Fragment key={data.id}>
-                  <Room deleteRoom={this.deleteRoom} apiData={data} />
+                  <Room
+                    deleteRoom={this.deleteRoom}
+                    enterRoom={this.enterRoom}
+                    apiData={data}
+                  />
                 </React.Fragment>
               );
             })

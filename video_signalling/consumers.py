@@ -70,6 +70,11 @@ class VideoConsumer(AsyncWebsocketConsumer):
                     "answer": data["answer"],
                 },
             )
+        elif data["type"] == "disconnected":
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {"type": "disconnected", "from": data["from"]},
+            )
 
     async def new_user_joined(self, event):
         await self.send(
@@ -113,6 +118,16 @@ class VideoConsumer(AsyncWebsocketConsumer):
                     "from": event["from"],
                     "to": event["to"],
                     "answer": event["answer"],
+                }
+            )
+        )
+
+    async def disconnected(self, event):
+        await self.send(
+            json.dumps(
+                {
+                    "type": "disconnected",
+                    "from": event["from"],
                 }
             )
         )

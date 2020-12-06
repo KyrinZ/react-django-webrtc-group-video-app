@@ -9,7 +9,12 @@ import jwt_decode from "jwt-decode";
 
 // Components
 import { Nav, RoomList, VideoRoom, Login, Register } from "./components";
-import axiosInstance, { validateToken } from "./components/utilities/axios";
+import axiosInstance, {
+  validateToken,
+  refreshingAccessToken,
+} from "./components/utilities/axios";
+import { AVAILABLE_PATHS, ALL_PATH_TITLES } from "./CONSTANTS";
+import AuthenticationRoute from "./AuthenticationRoute";
 
 export class Routes extends Component {
   constructor(props) {
@@ -19,7 +24,7 @@ export class Routes extends Component {
       LOGIN_PATH: "/login",
       REGISTER_PATH: "/register",
       USER_PROFILE_PATH: "/user-profile",
-      VIDEO_ROOM_PATH: "/video/room",
+      VIDEO_ROOM_PATH: "/video/:roomId",
     };
 
     this.ALL_PATH_TITLES = {
@@ -33,16 +38,31 @@ export class Routes extends Component {
     this.state = {
       userData: {
         userId: null,
-        userType: "Anonymous",
         isUserLoggedIn: false,
       },
       pageTitle: this.changePageTitle(),
+      isRoomFormOpen: false,
+      feedbackMsg: "",
     };
 
     this.navigationBar = this.navigationBar.bind(this);
     this.lobbyPage = this.lobbyPage.bind(this);
-    this.loginPage = this.loginPage.bind(this);
-    this.registerPage = this.registerPage.bind(this);
+    this.closeRoomForm = this.closeRoomForm.bind(this);
+    this.openRoomForm = this.openRoomForm.bind(this);
+    this.printFeedback = this.printFeedback.bind(this);
+    this.videoRoomPage = this.videoRoomPage.bind(this);
+    this.authenticateUser = this.authenticateUser.bind(this);
+  }
+
+  closeRoomForm() {
+    this.setState({
+      isRoomFormOpen: false,
+    });
+  }
+  openRoomForm() {
+    this.setState({
+      isRoomFormOpen: true,
+    });
   }
 
   changePageTitle = () => {
@@ -52,7 +72,7 @@ export class Routes extends Component {
       LOGIN_PATH,
       REGISTER_PATH,
       USER_PROFILE_PATH,
-    } = this.AVAILABLE_PATHS;
+    } = AVAILABLE_PATHS;
 
     const {
       LOBBY_TITLE,
@@ -86,6 +106,23 @@ export class Routes extends Component {
     return pageTitle;
   };
 
+  printFeedback = ({ type, feedbackMsg }) => {
+    switch (type) {
+      case "success":
+        this.setState({
+          feedbackMsg: feedbackMsg,
+        });
+        break;
+      case "error":
+        this.setState({
+          feedbackMsg: feedbackMsg,
+        });
+        break;
+      default:
+        break;
+    }
+  };
+
   navigationBar = (props) => {
     const {
       userData: { isUserLoggedIn },
@@ -114,39 +151,33 @@ export class Routes extends Component {
         menuItems={menuItems}
         isUserLoggedIn={isUserLoggedIn}
         authenticateUser={this.authenticateUser}
+        openRoomForm={this.openRoomForm}
         {...props}
       />
     );
   };
 
   lobbyPage = (props) => {
-    const { isUserLoggedIn } = this.state.userData;
-    return <RoomList isUserLoggedIn={isUserLoggedIn} {...props} />;
-  };
-
-  loginPage = (props) => {
-    const { isUserLoggedIn } = this.state.userData;
-    return isUserLoggedIn ? (
-      <Redirect to={this.AVAILABLE_PATHS.LOBBY_PATH} exact />
-    ) : (
-      <Login
-        authenticateUser={this.authenticateUser}
-        redirectPath={this.AVAILABLE_PATHS.LOBBY_PATH}
+    const { userData, isRoomFormOpen } = this.state;
+    const { isUserLoggedIn } = userData;
+    return (
+      <RoomList
+        printFeedback={this.printFeedback}
+        closeRoomForm={this.closeRoomForm}
+        isRoomFormOpen={isRoomFormOpen}
+        isUserLoggedIn={isUserLoggedIn}
         {...props}
       />
     );
   };
 
-  registerPage = (props) => {
-    const { isUserLoggedIn } = this.state.userData;
-    return isUserLoggedIn ? (
-      <Redirect to={this.AVAILABLE_PATHS.LOBBY_PATH} exact />
+  videoRoomPage = (props) => {
+    const { userData } = this.state;
+    const { isUserLoggedIn } = userData;
+    return !isUserLoggedIn ? (
+      <Redirect to={this.AVAILABLE_PATHS.LOGIN_PATH} exact />
     ) : (
-      <Register
-        authenticateUser={this.authenticateUser}
-        redirectPath={this.AVAILABLE_PATHS.LOBBY_PATH}
-        {...props}
-      />
+      <VideoRoom userData={userData} {...props} />
     );
   };
 
@@ -159,20 +190,20 @@ export class Routes extends Component {
           this.setState({
             userData: {
               userId: userId,
-              userType: "Registered",
               isUserLoggedIn: true,
             },
           });
+          refreshingAccessToken();
         }
       })
       .catch((error) => {
         console.log(error.message);
+        this.printFeedback({ type: "error", feedbackMsg: error.message });
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
         this.setState({
           userData: {
             userId: null,
-            userType: "Anonymous",
             isUserLoggedIn: false,
           },
         });
@@ -188,20 +219,34 @@ export class Routes extends Component {
       LOGIN_PATH,
       REGISTER_PATH,
       VIDEO_ROOM_PATH,
-    } = this.AVAILABLE_PATHS;
+    } = AVAILABLE_PATHS;
+
+    const authenticationProps = {
+      isUserLoggedIn: this.state.userData.isUserLoggedIn,
+      printFeedback: this.printFeedback,
+      authenticateUser: this.authenticateUser,
+    };
 
     return (
-      <>
-        <Router>
-          <Route render={this.navigationBar} />
-          <Switch>
-            <Route exact path={LOBBY_PATH} render={this.lobbyPage} />
-            <Route exact path={LOGIN_PATH} render={this.loginPage} />
-            <Route exact path={REGISTER_PATH} render={this.registerPage} />
-            <Route exact path={VIDEO_ROOM_PATH} component={VideoRoom} />
-          </Switch>
-        </Router>
-      </>
+      <Router>
+        <Route render={this.navigationBar} />
+        <div>{this.state.feedbackMsg}</div>
+        <Switch>
+          <Route exact path={LOBBY_PATH} render={this.lobbyPage} />
+          <AuthenticationRoute
+            path={LOGIN_PATH}
+            component={Login}
+            authenticationProps={authenticationProps}
+          />
+          <AuthenticationRoute
+            path={REGISTER_PATH}
+            component={Register}
+            authenticationProps={authenticationProps}
+          />
+          <Route exact path={REGISTER_PATH} render={this.registerPage} />
+          <Route exact path={VIDEO_ROOM_PATH} render={this.videoRoomPage} />
+        </Switch>
+      </Router>
     );
   }
 }

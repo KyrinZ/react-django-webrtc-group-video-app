@@ -8,7 +8,7 @@ import Button from "@material-ui/core/Button";
 // Components
 import Video from "./Video";
 
-const WEBSOCKET_URL = "ws://127.0.0.1:8000/video/ROOM/";
+const WEBSOCKET_URL = "ws://127.0.0.1:8000/video/";
 export class VideoRoom extends Component {
   constructor(props) {
     super(props);
@@ -24,6 +24,10 @@ export class VideoRoom extends Component {
   }
 
   joinCall = () => {
+    const {
+      userData: { userId },
+    } = this.props;
+
     navigator.mediaDevices
       .getUserMedia({
         video: true,
@@ -31,12 +35,12 @@ export class VideoRoom extends Component {
       })
       .then((stream) => {
         this.setState({ stream: stream });
-        document.getElementById("localVideo").srcObject = stream;
 
+        document.getElementById("localVideo").srcObject = stream;
         this.state.websocket.send(
           JSON.stringify({
             type: "media_enabled",
-            user_id: this.state.userId,
+            user_id: userId,
           })
         );
 
@@ -44,15 +48,8 @@ export class VideoRoom extends Component {
         if (this.usersOnMedia() > 0) {
           const peers = [];
           this.state.usersConnected.forEach((otherUser) => {
-            if (
-              otherUser.user_id !== this.state.userId &&
-              otherUser.media_enabled
-            ) {
-              const peer = this.CreatePeer(
-                this.state.userId,
-                otherUser.user_id,
-                stream
-              );
+            if (otherUser.user_id !== userId && otherUser.media_enabled) {
+              const peer = this.CreatePeer(userId, otherUser.user_id, stream);
 
               peers.push({ user_id: otherUser.user_id, peer: peer });
             }
@@ -64,6 +61,26 @@ export class VideoRoom extends Component {
         }
       })
       .catch((error) => console.log(error.message));
+  };
+
+  endCall = () => {
+    const { peersEstablished, websocket } = this.state;
+    const {
+      userData: { userId },
+    } = this.props;
+
+    peersEstablished.forEach((userPeer) => {
+      userPeer.peer.destroy();
+    });
+    if (websocket) {
+      websocket.send(
+        JSON.stringify({
+          type: "disconnected",
+          from: userId,
+        })
+      );
+    }
+    window.location.reload();
   };
 
   CreatePeer = (currentUserId, otherUserId, currentUserStream) => {
@@ -116,7 +133,11 @@ export class VideoRoom extends Component {
     return noOfUserMediaEnabled;
   };
   componentDidMount = () => {
-    const websocket = new WebSocket(WEBSOCKET_URL);
+    const {
+      match: { params },
+      userData: { userId },
+    } = this.props;
+    const websocket = new WebSocket(WEBSOCKET_URL + `${params.roomId}/`);
     this.setState({
       websocket: websocket,
     });
@@ -125,7 +146,7 @@ export class VideoRoom extends Component {
       websocket.send(
         JSON.stringify({
           type: "store_user",
-          new_user_id: this.state.userId,
+          new_user_id: userId,
         })
       );
     };
@@ -147,10 +168,10 @@ export class VideoRoom extends Component {
           console.log("User No. " + data.userId + " enabled media");
           break;
         case "sending_offer":
-          if (data.to === this.state.userId) {
+          if (data.to === userId) {
             console.log("offer_received");
             const peer = this.addPeer(
-              this.state.userId,
+              userId,
               data.from,
               data.offer,
               this.state.stream
@@ -165,7 +186,7 @@ export class VideoRoom extends Component {
           }
           break;
         case "sending_answer":
-          if (data.to === this.state.userId) {
+          if (data.to === userId) {
             console.log("answer_received");
             const userPeer = this.state.peersEstablished.find(
               (user) => user.user_id === data.from
@@ -174,9 +195,30 @@ export class VideoRoom extends Component {
           }
 
           break;
+        case "disconnected":
+          if (data.from !== userId) {
+            console.log("user " + data.from + " disconnected");
+            const userPeer = this.state.peersEstablished.find(
+              (user) => user.user_id === data.from
+            );
+            userPeer.peer.destroy();
+            const newPeersList = this.state.peersEstablished.filter(
+              (peer) => userPeer.user_id !== peer.user_id
+            );
+
+            this.setState({ peersEstablished: newPeersList });
+          }
+
+          break;
 
         default:
           break;
+      }
+    };
+
+    this.componentWillUnmount = () => {
+      if (this.state.websocket) {
+        this.state.websocket.close();
       }
     };
 
@@ -193,7 +235,7 @@ export class VideoRoom extends Component {
   render() {
     return (
       <div>
-        <video id="localVideo" autoPlay></video>
+        <Video id="localVideo" />
         {this.state.peersEstablished.map((userPeer, index) => (
           <Video
             key={index}
@@ -203,6 +245,7 @@ export class VideoRoom extends Component {
           />
         ))}
         <Button onClick={this.joinCall}>Join Call</Button>
+        <Button onClick={this.endCall}>End Call</Button>
       </div>
     );
   }

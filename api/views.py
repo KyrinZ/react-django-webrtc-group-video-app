@@ -1,9 +1,13 @@
+from django.core.checks import messages
 from rest_framework import status, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.shortcuts import get_object_or_404
 
-from .models import Room
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
+from .models import Room, User
 from .serializers import RoomSerializer, UserSerializerWithToken
 
 
@@ -35,3 +39,20 @@ class RoomViewSet(viewsets.ModelViewSet):
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
+
+    def destroy(self, request, pk=None):
+        room = get_object_or_404(Room, id=pk)
+
+        if room:
+            authenticate_class = JWTAuthentication()
+            user, _ = authenticate_class.authenticate(request)
+            if user.id == room.user.id:
+                room.delete()
+            else:
+                return Response(
+                    {
+                        "message": "Either you are not logged in or you are not the owner of this room to delete this"
+                    },
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+        return Response({}, status=status.HTTP_204_NO_CONTENT)
