@@ -1,23 +1,20 @@
 import React, { Component } from "react";
 import { Formik, Form } from "formik";
 
+// Material UI components
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import Paper from "@material-ui/core/Paper";
-import Container from "@material-ui/core/Container";
-import Grid from "@material-ui/core/Grid";
 import { withStyles } from "@material-ui/core/styles";
 
-// Components
-import roomFormValidationSchema from "../../utilities/roomForms_validation_schema";
-import FormikUIField from "../../utilities/form_fields/FormikUIField";
-import FormikUISelect from "../../utilities/form_fields/FormikUISelect";
-
-const styles = {
-  submitBtn: {
-    margin: "1rem 0",
-  },
-};
+// Utility components, functions, constants, objects...
+import {
+  roomFormValidationSchema,
+  FormikUIField,
+  FormikUISelect,
+  UserInfoContext,
+} from "../../utilities";
+import createRoomFormStyles from "./create_room_form_styles";
 
 class CreateRoomForm extends Component {
   constructor(props) {
@@ -32,16 +29,15 @@ class CreateRoomForm extends Component {
         value: "IO",
         label: "Invite only",
       },
-      {
-        value: "RO",
-        label: "Register only",
-      },
     ];
   }
-
+  static contextType = UserInfoContext;
   render() {
+    const { userId } = this.context;
+
     // Instantiating form fields with pretty much empty values
     let initialValues = {
+      user: userId,
       title: "",
       description: "",
       typeOf: "OTA",
@@ -50,61 +46,62 @@ class CreateRoomForm extends Component {
     const { classes, onRoomFormSubmit } = this.props;
 
     return (
-      <Container maxWidth="sm">
-        <Paper elevation={3}>
-          <Container>
-            <Formik
-              initialValues={initialValues}
-              onSubmit={onRoomFormSubmit}
-              validationSchema={roomFormValidationSchema}
-            >
-              {({ isValid, dirty, errors, touched }) => (
-                <Form>
-                  <Typography align="center" variant="h4">
-                    Create Room
-                  </Typography>
-                  <FormikUIField
-                    name="title"
-                    label="Title"
-                    type="text"
-                    required
-                    fullWidth
-                    error={errors.title || touched.title}
-                  />
-                  <FormikUIField
-                    name="description"
-                    label="Event description"
-                    type="text"
-                    fullWidth
-                    multiline
-                    rows={4}
-                  />
-                  <FormikUISelect
-                    name="typeOf"
-                    label="Event type"
-                    items={this.roomTypes}
-                    error={errors.typeOf || touched.typeOf}
-                    required
-                  />
+      <Paper className={classes.formPaper} elevation={3}>
+        <Formik
+          initialValues={initialValues}
+          onSubmit={onRoomFormSubmit}
+          validationSchema={roomFormValidationSchema}
+        >
+          {({ isValid, dirty, errors, touched }) => (
+            <Form>
+              <Typography align="center" variant="h4">
+                New Room
+              </Typography>
 
-                  <Grid container direction="row" justify="center">
-                    <Button
-                      fullWidth
-                      disabled={!dirty || !isValid}
-                      className={classes.submitBtn}
-                      variant="contained"
-                      type="submit"
-                    >
-                      Create Room
-                    </Button>
-                  </Grid>
-                </Form>
-              )}
-            </Formik>
-          </Container>
-        </Paper>
-      </Container>
+              {/* Title */}
+              <FormikUIField
+                name="title"
+                label="Title"
+                type="text"
+                required
+                fullWidth
+                error={errors.title}
+              />
+
+              {/* Description */}
+              <FormikUIField
+                name="description"
+                label="Event description"
+                type="text"
+                fullWidth
+                error={errors.description}
+                multiline
+                rows={4}
+              />
+
+              {/* Room type */}
+              <FormikUISelect
+                name="typeOf"
+                label="Event type"
+                items={this.roomTypes}
+                error={errors.typeOf || touched.typeOf}
+                required
+              />
+
+              <Button
+                fullWidth
+                disabled={!dirty || !isValid}
+                className={classes.createRoomBtn}
+                variant="contained"
+                type="submit"
+              >
+                Create Room
+              </Button>
+            </Form>
+          )}
+        </Formik>
+      </Paper>
     );
   }
 }
-export default withStyles(styles)(CreateRoomForm);
+export default withStyles(createRoomFormStyles)(CreateRoomForm);

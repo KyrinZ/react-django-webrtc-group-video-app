@@ -10,6 +10,7 @@ django-cors-headers = "*"
 djangorestframework-camel-case = "*"
 djangorestframework-simplejwt = "*"
 channels = "*"
+Pillow = "*"
 
 [dev-packages]
 httpie = "*"

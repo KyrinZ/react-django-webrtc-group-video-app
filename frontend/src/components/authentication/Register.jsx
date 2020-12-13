@@ -5,33 +5,17 @@ import { Formik, Form } from "formik";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import Button from "@material-ui/core/Button";
 import Paper from "@material-ui/core/Paper";
-import Container from "@material-ui/core/Container";
 import Typography from "@material-ui/core/Typography";
-import Grid from "@material-ui/core/Grid";
 import { withStyles } from "@material-ui/core/styles";
 
-// Components
-import FormikUIField from "../utilities/form_fields/FormikUIField";
-import { registerValidationSchema } from "../utilities/authForms_validation_schema";
-import axiosInstance from "../utilities/axios";
-import RouterUILink from "../utilities/RouterUILink";
-
-const styles = (theme) => ({
-  paper: {
-    marginTop: theme.spacing(4),
-    padding: theme.spacing(3),
-    textAlign: "center",
-    color: theme.palette.text.primary,
-    borderRadius: "1rem",
-  },
-  button: {
-    marginTop: theme.spacing(3),
-    marginBottom: theme.spacing(2),
-  },
-  input: {
-    display: "inline-block",
-  },
-});
+// Utility components, functions, constants, objects...
+import {
+  FormikUIField,
+  registerValidationSchema,
+  axiosInstance,
+  RouterUILink,
+} from "../utilities";
+import formStyles from "./form_styles";
 
 class Register extends Component {
   constructor(props) {
@@ -92,94 +76,98 @@ class Register extends Component {
       confirmation: "",
     };
     return (
-      <Container maxWidth="sm">
-        <Paper className={classes.paper} elevation={3}>
-          <Container>
-            <Formik
-              initialValues={initialValues}
-              onSubmit={this.onSubmitRegisterForm}
-              validationSchema={registerValidationSchema}
-            >
-              {({ dirty, isValid, errors, touched }) => (
-                <Form>
-                  <Typography align="center" variant="h3">
-                    Register
-                  </Typography>
+      <Paper className={classes.formPaper} elevation={3}>
+        <Formik
+          initialValues={initialValues}
+          onSubmit={this.onSubmitRegisterForm}
+          validationSchema={registerValidationSchema}
+        >
+          {({ dirty, isValid, errors, touched }) => (
+            <Form>
+              <Typography align="center" variant="h3">
+                Register
+              </Typography>
 
-                  <Grid container justify="space-between">
-                    <FormikUIField
-                      name="firstName"
-                      label="First Name"
-                      type="text"
-                      required
-                      error={errors.firstName && touched.firstName}
-                    />
+              <div className={classes.fullName}>
+                {/* First Name */}
+                <FormikUIField
+                  fullWidth
+                  name="firstName"
+                  label="First Name"
+                  type="text"
+                  required
+                  error={errors.firstName && touched.firstName}
+                />
 
-                    <FormikUIField
-                      name="lastName"
-                      label="Last Name"
-                      type="text"
-                      required
-                      error={errors.lastName && touched.lastName}
-                    />
-                  </Grid>
-                  <FormikUIField
-                    name="email"
-                    label="Email"
-                    type="email"
-                    fullWidth
-                    required
-                    error={errors.email && touched.email}
-                  />
+                {/* Last Name */}
+                <FormikUIField
+                  fullWidth
+                  name="lastName"
+                  label="Last Name"
+                  type="text"
+                  required
+                  error={errors.lastName && touched.lastName}
+                />
+              </div>
 
-                  <FormikUIField
-                    name="password"
-                    label="Password"
-                    type="password"
-                    fullWidth
-                    required
-                    error={errors.password && touched.password}
-                  />
+              {/* Email */}
+              <FormikUIField
+                name="email"
+                label="Email"
+                type="email"
+                fullWidth
+                required
+                error={errors.email && touched.email}
+              />
 
-                  <FormikUIField
-                    name="confirmation"
-                    label="Confirm Password"
-                    type="password"
-                    fullWidth
-                    required
-                    error={errors.confirmation && touched.confirmation}
-                  />
+              <FormikUIField
+                name="password"
+                label="Password"
+                type="password"
+                fullWidth
+                required
+                error={errors.password && touched.password}
+              />
 
-                  {this.state.serverErrors
-                    ? this.state.serverErrors.map((error, index) => (
-                        <FormHelperText key={index} error>
-                          {error}
-                        </FormHelperText>
-                      ))
-                    : null}
+              {/* Password */}
+              <FormikUIField
+                name="confirmation"
+                label="Confirm Password"
+                type="password"
+                fullWidth
+                required
+                error={errors.confirmation && touched.confirmation}
+              />
 
-                  <Button
-                    fullWidth
-                    className={classes.button}
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    disabled={!dirty || !isValid}
-                  >
-                    Register
-                  </Button>
-                  <Typography display="block" variant="caption">
-                    already have an account?
-                    <RouterUILink linkTo="/login" innerText="Log In" />
-                  </Typography>
-                </Form>
-              )}
-            </Formik>
-          </Container>
-        </Paper>
-      </Container>
+              {/* Server Errors */}
+              {this.state.serverErrors
+                ? this.state.serverErrors.map((error, index) => (
+                    <FormHelperText key={index} error>
+                      {error}
+                    </FormHelperText>
+                  ))
+                : null}
+
+              <Button
+                fullWidth
+                className={classes.formButton}
+                type="submit"
+                variant="contained"
+                color="primary"
+                disabled={!dirty || !isValid}
+              >
+                Register
+              </Button>
+              <Typography display="block" variant="caption">
+                already have an account?
+                <RouterUILink linkTo="/login" innerText="Log In" />
+              </Typography>
+            </Form>
+          )}
+        </Formik>
+      </Paper>
     );
   }
 }
 
-export default withStyles(styles)(Register);
+export default withStyles(formStyles)(Register);

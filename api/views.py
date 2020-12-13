@@ -1,17 +1,32 @@
-from django.core.checks import messages
+from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.shortcuts import get_object_or_404
-
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.views import TokenObtainPairView as OriginalObtainPairView
+from .models import Room
+from .serializers import (
+    RoomSerializer,
+    TokenObtainPairSerializer,
+    UserSerializerWithToken,
+)
 
-from .models import Room, User
-from .serializers import RoomSerializer, UserSerializerWithToken
+
+class TokenObtainPairView(OriginalObtainPairView):
+    """
+    Custom view for obtaining token pair
+    """
+
+    serializer_class = TokenObtainPairSerializer
 
 
 class RegisterAndObtainTokenView(APIView):
+
+    """
+    Register user. Only Post method is allowed
+    """
+
     permission_classes = [AllowAny]
     authentication_classes = []
 
@@ -26,9 +41,21 @@ class RegisterAndObtainTokenView(APIView):
 
 
 class RoomViewSet(viewsets.ModelViewSet):
+    """
+    Rooms View
+    """
 
-    queryset = Room.objects.all()
+    queryset = Room.objects.all().order_by("-created_on")
     serializer_class = RoomSerializer
+
+    def get_queryset(self):
+        queryset = Room.objects.all().order_by("-created_on")
+        search = self.request.query_params.get("search", None)
+        if search is not None:
+            queryset = Room.objects.filter(title__icontains=search).order_by(
+                "-created_on"
+            )
+        return queryset
 
     def get_permissions(self):
         """
@@ -41,6 +68,10 @@ class RoomViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
     def destroy(self, request, pk=None):
+
+        """
+        Checks whether user requesting a delete of the room is the owner of the room or not
+        """
         room = get_object_or_404(Room, id=pk)
 
         if room:
@@ -51,7 +82,7 @@ class RoomViewSet(viewsets.ModelViewSet):
             else:
                 return Response(
                     {
-                        "message": "Either you are not logged in or you are not the owner of this room to delete this"
+                        "message": "Either you are not logged in or you are not the owner of this room to delete"
                     },
                     status=status.HTTP_401_UNAUTHORIZED,
                 )

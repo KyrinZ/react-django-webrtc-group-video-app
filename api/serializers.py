@@ -1,13 +1,33 @@
-from datetime import datetime
+from uuid import uuid4
 
-from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.password_validation import (
+    validate_password as original_pwd_validate,
+)
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.serializers import (
+    TokenObtainPairSerializer as OriginalObtainPairSerializer,
+)
 
 from .models import Room, User
 
 
+class TokenObtainPairSerializer(OriginalObtainPairSerializer):
+    """
+    Custom Token pair generator
+    """
+
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token["full_name"] = user.first_name + " " + user.last_name
+        return token
+
+
 class UserSerializerWithToken(serializers.ModelSerializer):
+    """
+    User register serializer
+    """
+
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
     tokens = serializers.SerializerMethodField("getting_token", read_only=True)
@@ -23,8 +43,9 @@ class UserSerializerWithToken(serializers.ModelSerializer):
         model = User
         fields = ("email", "first_name", "last_name", "password", "tokens")
 
+    # Validates the password with django password validation
     def validate_password(self, value):
-        validate_password(value)
+        original_pwd_validate(value)
         return value
 
     def create(self, validated_data):
@@ -33,7 +54,15 @@ class UserSerializerWithToken(serializers.ModelSerializer):
 
 
 class RoomSerializer(serializers.ModelSerializer):
+
+    """
+    Room Serialiser
+    """
+
     room_id = serializers.SerializerMethodField()
+    created_on = serializers.DateTimeField(
+        format="%a %I:%M %p, %d %b %Y", required=False
+    )
 
     class Meta:
         model = Room
@@ -47,5 +76,8 @@ class RoomSerializer(serializers.ModelSerializer):
             "room_id",
         ]
 
+    # Generate room id
     def get_room_id(self, obj):
+        if obj.type_of == "IO":
+            return "room" + str(uuid4().hex)
         return "room" + str(obj.id)

@@ -1,58 +1,81 @@
 import React, { Component } from "react";
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Redirect,
-} from "react-router-dom";
+import { BrowserRouter as Router, Switch } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 
 // Components
-import { Nav, RoomList, VideoRoom, Login, Register } from "./components";
-import axiosInstance, {
+import {
+  Login,
+  Register,
+  AuthenticationRoute,
+  LobbyRoute,
+  NavigationBar,
+  VideoRoomRoute,
+} from "./components";
+
+// Utility components, functions, constants, objects...
+import {
+  Feedback,
+  UserInfoProvider,
+  AVAILABLE_PATHS,
+  axiosInstance,
   validateToken,
   refreshingAccessToken,
-} from "./components/utilities/axios";
-import { AVAILABLE_PATHS, ALL_PATH_TITLES } from "./CONSTANTS";
-import AuthenticationRoute from "./AuthenticationRoute";
+  getRoomsList,
+  Loading,
+} from "./components/utilities";
 
 export class Routes extends Component {
   constructor(props) {
     super(props);
-    this.AVAILABLE_PATHS = {
-      LOBBY_PATH: "/",
-      LOGIN_PATH: "/login",
-      REGISTER_PATH: "/register",
-      USER_PROFILE_PATH: "/user-profile",
-      VIDEO_ROOM_PATH: "/video/:roomId",
-    };
-
-    this.ALL_PATH_TITLES = {
-      LOBBY_TITLE: "Lobby",
-      LOGIN_TITLE: "Login",
-      REGISTER_TITLE: "Register",
-      USER_PROFILE_TITLE: "User Profile",
-      LOGOUT_TITLE: "Logout",
-    };
 
     this.state = {
       userData: {
+        isDataArrived: false,
         userId: null,
+        userFullName: "",
         isUserLoggedIn: false,
       },
-      pageTitle: this.changePageTitle(),
       isRoomFormOpen: false,
+
+      severity: "",
       feedbackMsg: "",
+      isFeedbackOpen: false,
+
+      roomListData: [],
+      loadingRooms: true,
+      search: "",
     };
 
-    this.navigationBar = this.navigationBar.bind(this);
-    this.lobbyPage = this.lobbyPage.bind(this);
+    this.loadRooms = this.loadRooms.bind(this);
+    this.handleSearchChanges = this.handleSearchChanges.bind(this);
     this.closeRoomForm = this.closeRoomForm.bind(this);
     this.openRoomForm = this.openRoomForm.bind(this);
     this.printFeedback = this.printFeedback.bind(this);
-    this.videoRoomPage = this.videoRoomPage.bind(this);
+    this.closeFeedback = this.closeFeedback.bind(this);
     this.authenticateUser = this.authenticateUser.bind(this);
   }
+
+  loadRooms(search = "") {
+    this.setState({
+      loadingRooms: true,
+    });
+    getRoomsList(axiosInstance, search)
+      .then((res) => {
+        this.setState(() => ({ roomListData: res.data, loadingRooms: false }));
+      })
+      .catch((error) => {
+        this.setState(() => ({ loadingRooms: false }));
+        this.printFeedback({ type: "error", feedbackMsg: error.message });
+        console.log(error.message);
+      });
+  }
+
+  handleSearchChanges = async (event) => {
+    await this.setState({
+      search: event.target.value,
+    });
+    await this.loadRooms(this.state.search);
+  };
 
   closeRoomForm() {
     this.setState({
@@ -65,57 +88,20 @@ export class Routes extends Component {
     });
   }
 
-  changePageTitle = () => {
-    const currentUrlPath = window.location.pathname;
-    const {
-      LOBBY_PATH,
-      LOGIN_PATH,
-      REGISTER_PATH,
-      USER_PROFILE_PATH,
-    } = AVAILABLE_PATHS;
-
-    const {
-      LOBBY_TITLE,
-      LOGIN_TITLE,
-      REGISTER_TITLE,
-      USER_PROFILE_TITLE,
-    } = this.ALL_PATH_TITLES;
-
-    let pageTitle;
-
-    switch (currentUrlPath) {
-      case LOBBY_PATH:
-        pageTitle = LOBBY_TITLE;
-        break;
-      case LOGIN_PATH:
-        pageTitle = LOGIN_TITLE;
-        break;
-      case REGISTER_PATH:
-        pageTitle = REGISTER_TITLE;
-        break;
-      case USER_PROFILE_PATH:
-        pageTitle = USER_PROFILE_TITLE;
-        break;
-      default:
-        pageTitle = "404";
-        break;
-    }
-    this.setState({
-      pageTitle: pageTitle,
-    });
-    return pageTitle;
-  };
-
   printFeedback = ({ type, feedbackMsg }) => {
     switch (type) {
       case "success":
         this.setState({
+          severity: "success",
           feedbackMsg: feedbackMsg,
+          isFeedbackOpen: true,
         });
         break;
       case "error":
         this.setState({
+          severity: "error",
           feedbackMsg: feedbackMsg,
+          isFeedbackOpen: true,
         });
         break;
       default:
@@ -123,62 +109,14 @@ export class Routes extends Component {
     }
   };
 
-  navigationBar = (props) => {
-    const {
-      userData: { isUserLoggedIn },
-      pageTitle,
-    } = this.state;
-    const {
-      LOBBY_TITLE,
-      LOGIN_TITLE,
-      REGISTER_TITLE,
-      USER_PROFILE_TITLE,
-      LOGOUT_TITLE,
-    } = this.ALL_PATH_TITLES;
-    let menuItems;
-    if (isUserLoggedIn) {
-      menuItems = [LOBBY_TITLE, USER_PROFILE_TITLE, LOGOUT_TITLE];
-    } else {
-      menuItems = [LOBBY_TITLE, LOGIN_TITLE, REGISTER_TITLE];
+  closeFeedback = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
     }
-    return (
-      <Nav
-        key={window.location.pathname}
-        availablePaths={this.AVAILABLE_PATHS}
-        availablePathTitles={this.ALL_PATH_TITLES}
-        changePageTitle={this.changePageTitle}
-        pageTitle={pageTitle}
-        menuItems={menuItems}
-        isUserLoggedIn={isUserLoggedIn}
-        authenticateUser={this.authenticateUser}
-        openRoomForm={this.openRoomForm}
-        {...props}
-      />
-    );
-  };
 
-  lobbyPage = (props) => {
-    const { userData, isRoomFormOpen } = this.state;
-    const { isUserLoggedIn } = userData;
-    return (
-      <RoomList
-        printFeedback={this.printFeedback}
-        closeRoomForm={this.closeRoomForm}
-        isRoomFormOpen={isRoomFormOpen}
-        isUserLoggedIn={isUserLoggedIn}
-        {...props}
-      />
-    );
-  };
-
-  videoRoomPage = (props) => {
-    const { userData } = this.state;
-    const { isUserLoggedIn } = userData;
-    return !isUserLoggedIn ? (
-      <Redirect to={this.AVAILABLE_PATHS.LOGIN_PATH} exact />
-    ) : (
-      <VideoRoom userData={userData} {...props} />
-    );
+    this.setState({
+      isFeedbackOpen: false,
+    });
   };
 
   authenticateUser = () => {
@@ -187,9 +125,12 @@ export class Routes extends Component {
       .then((response) => {
         if (response.status === 200) {
           const userId = jwt_decode(refresh_token).user_id;
+          const userFullName = jwt_decode(refresh_token).full_name;
           this.setState({
             userData: {
+              isDataArrived: true,
               userId: userId,
+              userFullName: userFullName,
               isUserLoggedIn: true,
             },
           });
@@ -198,12 +139,13 @@ export class Routes extends Component {
       })
       .catch((error) => {
         console.log(error.message);
-        this.printFeedback({ type: "error", feedbackMsg: error.message });
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
         this.setState({
           userData: {
+            isDataArrived: true,
             userId: null,
+            userFullName: "",
             isUserLoggedIn: false,
           },
         });
@@ -220,33 +162,74 @@ export class Routes extends Component {
       REGISTER_PATH,
       VIDEO_ROOM_PATH,
     } = AVAILABLE_PATHS;
+    const {
+      userData,
+      isRoomFormOpen,
+      roomListData,
+      loadingRooms,
+      search,
+      severity,
+      feedbackMsg,
+      isFeedbackOpen,
+    } = this.state;
 
     const authenticationProps = {
-      isUserLoggedIn: this.state.userData.isUserLoggedIn,
+      isUserLoggedIn: userData.isUserLoggedIn,
       printFeedback: this.printFeedback,
       authenticateUser: this.authenticateUser,
     };
+    const lobbyProps = {
+      userData: userData,
+      loadingRooms: loadingRooms,
+      roomListData: roomListData,
+      loadRooms: this.loadRooms,
+      printFeedback: this.printFeedback,
+      closeRoomForm: this.closeRoomForm,
+      isRoomFormOpen: isRoomFormOpen,
+    };
+    const navProps = {
+      search: search,
+      handleSearchChanges: this.handleSearchChanges,
+      authenticateUser: this.authenticateUser,
+      openRoomForm: this.openRoomForm,
+      printFeedback: this.printFeedback,
+    };
 
-    return (
-      <Router>
-        <Route render={this.navigationBar} />
-        <div>{this.state.feedbackMsg}</div>
-        <Switch>
-          <Route exact path={LOBBY_PATH} render={this.lobbyPage} />
-          <AuthenticationRoute
-            path={LOGIN_PATH}
-            component={Login}
-            authenticationProps={authenticationProps}
+    return userData.isDataArrived ? (
+      <UserInfoProvider userData={userData}>
+        <Router>
+          <NavigationBar {...navProps} />
+          <Feedback
+            closeFeedback={this.closeFeedback}
+            isFeedbackOpen={isFeedbackOpen}
+            severity={severity}
+            feedbackMsg={feedbackMsg}
           />
-          <AuthenticationRoute
-            path={REGISTER_PATH}
-            component={Register}
-            authenticationProps={authenticationProps}
-          />
-          <Route exact path={REGISTER_PATH} render={this.registerPage} />
-          <Route exact path={VIDEO_ROOM_PATH} render={this.videoRoomPage} />
-        </Switch>
-      </Router>
+          <Switch>
+            <LobbyRoute exact path={LOBBY_PATH} lobbyProps={lobbyProps} />
+            <AuthenticationRoute
+              exact
+              path={LOGIN_PATH}
+              component={Login}
+              authenticationProps={authenticationProps}
+            />
+            <AuthenticationRoute
+              exact
+              path={REGISTER_PATH}
+              component={Register}
+              authenticationProps={authenticationProps}
+            />
+            <VideoRoomRoute
+              exact
+              path={VIDEO_ROOM_PATH}
+              userData={userData}
+              printFeedback={this.printFeedback}
+            />
+          </Switch>
+        </Router>
+      </UserInfoProvider>
+    ) : (
+      <Loading />
     );
   }
 }

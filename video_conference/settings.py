@@ -65,7 +65,7 @@ ROOT_URLCONF = "video_conference.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "frontend/build"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -130,11 +130,9 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://192.168.8.101:3000",
-#     "http://localhost:3000",
-#     "https://16f4d36c56f3.ngrok.io",
-# ]
+STATICFILES_DIRS = [BASE_DIR / "frontend/build/static"]
+
+
 CORS_ALLOW_ALL_ORIGINS = True
 
 REST_FRAMEWORK = {

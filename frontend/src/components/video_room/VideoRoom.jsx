@@ -1,95 +1,73 @@
 import React, { Component } from "react";
 import Peer from "simple-peer";
-import jwt_decode from "jwt-decode";
 
 // Material UI components
-import Button from "@material-ui/core/Button";
+import { withStyles } from "@material-ui/core/styles";
+import Fab from "@material-ui/core/Fab";
+import VolumeUpRoundedIcon from "@material-ui/icons/VolumeUpRounded";
+import VolumeOffRoundedIcon from "@material-ui/icons/VolumeOffRounded";
+import VideocamRoundedIcon from "@material-ui/icons/VideocamRounded";
+import VideocamOffRoundedIcon from "@material-ui/icons/VideocamOffRounded";
+import ExitToAppRoundedIcon from "@material-ui/icons/ExitToAppRounded";
+import Tooltip from "@material-ui/core/Tooltip";
+import Alert from "@material-ui/lab/Alert";
 
 // Components
 import Video from "./Video";
 
-const WEBSOCKET_URL = "ws://127.0.0.1:8000/video/";
+// Utility components, functions, constants, objects...
+import { UserInfoContext, webSocketUrl, AVAILABLE_PATHS } from "../utilities";
+import videoRoomStyles from "./video_room_styles";
+
 export class VideoRoom extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      userId: jwt_decode(localStorage.getItem("access_token")).user_id,
       websocket: null,
       stream: null,
       usersConnected: [],
       peersEstablished: [],
+
+      isVideoMuted: false,
+      isAudioMuted: false,
+      contentLoading: true,
+
+      isVideoRoomAccessible: true,
     };
-    this.joinCall = this.joinCall.bind(this);
   }
 
-  joinCall = () => {
-    const {
-      userData: { userId },
-    } = this.props;
-
-    navigator.mediaDevices
-      .getUserMedia({
-        video: true,
-        audio: false,
-      })
-      .then((stream) => {
-        this.setState({ stream: stream });
-
-        document.getElementById("localVideo").srcObject = stream;
-        this.state.websocket.send(
-          JSON.stringify({
-            type: "media_enabled",
-            user_id: userId,
-          })
-        );
-
-        console.log(this.usersOnMedia());
-        if (this.usersOnMedia() > 0) {
-          const peers = [];
-          this.state.usersConnected.forEach((otherUser) => {
-            if (otherUser.user_id !== userId && otherUser.media_enabled) {
-              const peer = this.CreatePeer(userId, otherUser.user_id, stream);
-
-              peers.push({ user_id: otherUser.user_id, peer: peer });
-            }
-          });
-
-          this.setState({
-            peersEstablished: peers,
-          });
-        }
-      })
-      .catch((error) => console.log(error.message));
-  };
-
-  endCall = () => {
-    const { peersEstablished, websocket } = this.state;
-    const {
-      userData: { userId },
-    } = this.props;
-
-    peersEstablished.forEach((userPeer) => {
-      userPeer.peer.destroy();
+  muteVideo = () => {
+    const stream = document.getElementById("localVideo").srcObject;
+    if (!stream.getVideoTracks()[0]) return;
+    stream.getVideoTracks()[0].enabled = !stream.getVideoTracks()[0].enabled;
+    this.setState({
+      isVideoMuted: !stream.getVideoTracks()[0].enabled,
     });
-    if (websocket) {
-      websocket.send(
-        JSON.stringify({
-          type: "disconnected",
-          from: userId,
-        })
-      );
-    }
-    window.location.reload();
+  };
+  muteAudio = () => {
+    const stream = document.getElementById("localVideo").srcObject;
+    if (!stream.getAudioTracks()[0]) return;
+    stream.getAudioTracks()[0].enabled = !stream.getAudioTracks()[0].enabled;
+    this.setState({
+      isAudioMuted: !stream.getAudioTracks()[0].enabled,
+    });
   };
 
-  CreatePeer = (currentUserId, otherUserId, currentUserStream) => {
+  leaveRoom = () => {
+    const { history } = this.props;
+    history.push(AVAILABLE_PATHS.LOBBY_PATH);
+  };
+
+  // Creates offer to send it to other user in the room
+  CreatePeer = (currentUserId, otherUserId, currentUserStream = null) => {
     const peer = new Peer({
       initiator: true,
       trickle: false,
       stream: currentUserStream,
     });
 
+    // Offer is sent
     peer.on("signal", (signal) => {
       this.state.websocket.send(
         JSON.stringify({
@@ -100,16 +78,27 @@ export class VideoRoom extends Component {
         })
       );
     });
+
     return peer;
   };
 
-  addPeer = (currentUserId, otherUserId, receivedOffer, currentUserStream) => {
+  // Creates answer in response to the offer received
+  addPeer = (
+    currentUserId,
+    otherUserId,
+    receivedOffer,
+    currentUserStream = null
+  ) => {
     const peer = new Peer({
       initiator: false,
       trickle: false,
       stream: currentUserStream,
     });
+
+    // Offer is set as remote description
     peer.signal(receivedOffer);
+
+    // Answer is sent
     peer.on("signal", (signal) => {
       this.state.websocket.send(
         JSON.stringify({
@@ -123,50 +112,113 @@ export class VideoRoom extends Component {
     return peer;
   };
 
-  usersOnMedia = () => {
-    let noOfUserMediaEnabled = 0;
-    this.state.usersConnected.forEach((user) => {
-      if (user.user_id !== this.state.userId && user.media_enabled) {
-        noOfUserMediaEnabled = +1;
+  // Function to send offers to each users that are connected to the room
+  sendSignalsToAll = (currentUserId, stream = null) => {
+    const peers = [];
+    this.state.usersConnected.forEach((otherUser) => {
+      if (otherUser.user_id !== currentUserId) {
+        const peer = this.CreatePeer(currentUserId, otherUser.user_id, stream);
+        peers.push({
+          user_id: otherUser.user_id,
+          user_full_name: otherUser.user_full_name,
+          peer: peer,
+        });
       }
     });
-    return noOfUserMediaEnabled;
+
+    this.setState({
+      peersEstablished: peers,
+    });
   };
+
   componentDidMount = () => {
     const {
+      printFeedback,
       match: { params },
-      userData: { userId },
     } = this.props;
-    const websocket = new WebSocket(WEBSOCKET_URL + `${params.roomId}/`);
+
+    // Checks whether 'navigator.mediaDevices' is available for this browser or not
+    if (!navigator.mediaDevices) {
+      this.setState({ isVideoRoomAccessible: false });
+      printFeedback({
+        type: "error",
+        feedbackMsg:
+          "this video room is not accessible because the site is not running on secure protocol, i.e. 'HTTPS'",
+      });
+      return;
+    }
+    const { userId, userFullName } = this.context;
+
+    // Websocket connection is made
+    const websocket = new WebSocket(webSocketUrl() + `${params.roomId}/`);
     this.setState({
       websocket: websocket,
     });
 
     websocket.onopen = () => {
+      this.setState({
+        contentLoading: true,
+      });
+
+      // Send all users in the room new user joined
       websocket.send(
         JSON.stringify({
-          type: "store_user",
-          new_user_id: userId,
+          type: "new_user_joined",
+          from: userId,
+          user_full_name: userFullName,
+          token: localStorage.getItem("access_token"),
         })
       );
     };
 
     websocket.onmessage = (payload) => {
+      // Message from backend
       const data = JSON.parse(payload.data);
 
       switch (data.type) {
         case "new_user_joined":
           this.setState({
-            usersConnected: data.users,
+            usersConnected: data.users_connected,
           });
-          console.log("User No. " + data.newUserId + " joined this room");
+
+          // If user joined is current user, the user is requested to enable the media devices and offer is created and sent to other user
+          if (userId === data.from) {
+            navigator.mediaDevices
+              .getUserMedia({
+                video: true,
+                audio: false,
+              })
+              .then((stream) => {
+                this.setState({ stream: stream });
+                document.getElementById("localVideo").srcObject = stream;
+                this.sendSignalsToAll(userId, stream);
+              })
+              .catch((error) => {
+                this.setState({ isVideoRoomAccessible: false });
+                printFeedback({
+                  type: "error",
+                  feedbackMsg:
+                    "you need to enable media devices inorder to use access this room",
+                });
+                console.log(error.message);
+                return;
+              });
+          }
+
+          // Message is send to other user that new user joined
+          if (userId !== data.from) {
+            const user = this.state.usersConnected.find(
+              (eachUser) => eachUser.user_id === data.from
+            );
+            printFeedback({
+              type: "success",
+              feedbackMsg: `User No. ${user.user_full_name} joined this room`,
+            });
+            console.log(`User No. ${data.from} joined this room`);
+          }
           break;
-        case "media_enabled":
-          this.setState({
-            usersConnected: data.users,
-          });
-          console.log("User No. " + data.userId + " enabled media");
-          break;
+
+        // Offer is received here by others who then store it in there state and sends the answer
         case "sending_offer":
           if (data.to === userId) {
             console.log("offer_received");
@@ -176,79 +228,207 @@ export class VideoRoom extends Component {
               data.offer,
               this.state.stream
             );
-
-            this.setState(({ peersEstablished }, props) => ({
-              peersEstablished: [
+            this.setState(({ peersEstablished }) => {
+              const user = this.state.usersConnected.find(
+                (eachUser) => eachUser.user_id === data.from
+              );
+              let newPeersList = [
                 ...peersEstablished,
-                { user_id: data.from, peer: peer },
-              ],
-            }));
+                {
+                  user_id: data.from,
+                  user_full_name: user.user_full_name,
+                  peer: peer,
+                },
+              ];
+
+              // Checks whether the peer with same user id exists in the 'peersEstablished' state, that peer is then removed
+              const userPeer = this.state.peersEstablished.find(
+                (eachUser) => eachUser.user_id === data.from
+              );
+              if (userPeer) {
+                const newList = this.state.peersEstablished.filter(
+                  (peer) => userPeer.user_id !== peer.user_id
+                );
+
+                newPeersList = [
+                  ...newList,
+                  {
+                    user_id: data.from,
+                    user_full_name: user.user_full_name,
+                    peer: peer,
+                  },
+                ];
+              }
+
+              return {
+                peersEstablished: newPeersList,
+              };
+            });
           }
           break;
+
+        // Answer is received here by the user who just joined
         case "sending_answer":
           if (data.to === userId) {
             console.log("answer_received");
             const userPeer = this.state.peersEstablished.find(
-              (user) => user.user_id === data.from
+              (eachUser) => eachUser.user_id === data.from
             );
+
+            // Answer is set as remote description
             userPeer.peer.signal(data.answer);
           }
 
           break;
         case "disconnected":
           if (data.from !== userId) {
-            console.log("user " + data.from + " disconnected");
-            const userPeer = this.state.peersEstablished.find(
-              (user) => user.user_id === data.from
-            );
-            userPeer.peer.destroy();
-            const newPeersList = this.state.peersEstablished.filter(
-              (peer) => userPeer.user_id !== peer.user_id
+            const user = this.state.usersConnected.find(
+              (eachUser) => eachUser.user_id === data.from
             );
 
-            this.setState({ peersEstablished: newPeersList });
+            // Feedback is sent to users about who just disconnected
+            if (user) {
+              console.log(`User No. ${data.from} disconnected`);
+              printFeedback({
+                type: "error",
+                feedbackMsg: `User No. ${user.user_full_name} left`,
+              });
+
+              // Peer associated with the user that just disconnected is destroyed
+              const userPeer = this.state.peersEstablished.find(
+                (eachUser) => eachUser.user_id === data.from
+              );
+              if (userPeer) {
+                userPeer.peer.destroy();
+                const newPeersList = this.state.peersEstablished.filter(
+                  (peer) => userPeer.user_id !== peer.user_id
+                );
+                this.setState({ peersEstablished: newPeersList });
+              }
+            }
           }
-
           break;
-
         default:
           break;
       }
     };
-
-    this.componentWillUnmount = () => {
-      if (this.state.websocket) {
-        this.state.websocket.close();
-      }
-    };
-
-    websocket.onclose = () => {
-      this.setState({
-        stream: null,
-        usersConnected: [],
-        peersEstablished: [],
-      });
-      console.log("disconnected");
-    };
   };
 
+  componentWillUnmount = () => {
+    // Websocket is closed
+    const { websocket, peersEstablished, stream } = this.state;
+    if (websocket) {
+      this.state.websocket.close();
+    }
+
+    // All peers is destroyed
+    peersEstablished.forEach(({ peer }) => {
+      peer.destroy();
+    });
+
+    // Streams are stopped
+    if (stream) {
+      stream.getTracks().forEach((track) => {
+        track.stop();
+      });
+    }
+
+    // All state is cleared
+    this.setState({
+      websocket: null,
+      stream: null,
+      usersConnected: [],
+      peersEstablished: [],
+
+      isVideoMuted: true,
+      isAudioMuted: true,
+    });
+  };
+
+  static contextType = UserInfoContext;
   render() {
+    const {
+      isVideoRoomAccessible,
+      isVideoMuted,
+      isAudioMuted,
+      peersEstablished,
+    } = this.state;
+    const { userFullName } = this.context;
+    const { classes } = this.props;
     return (
       <div>
-        <Video id="localVideo" />
-        {this.state.peersEstablished.map((userPeer, index) => (
-          <Video
-            key={index}
-            id={`remote-${userPeer.user_id}`}
-            user_id={userPeer.user_id}
-            peer={userPeer.peer}
-          />
-        ))}
-        <Button onClick={this.joinCall}>Join Call</Button>
-        <Button onClick={this.endCall}>End Call</Button>
+        {isVideoRoomAccessible ? (
+          <>
+            {/* Action Buttons */}
+            <div className={classes.floatingButtons}>
+              {/* Video Mute/Unmute */}
+              <Tooltip title="Video ON/OFF">
+                <Fab
+                  className={classes.floatingButton}
+                  onClick={this.muteVideo}
+                  color="inherit"
+                >
+                  {isVideoMuted ? (
+                    <VideocamOffRoundedIcon />
+                  ) : (
+                    <VideocamRoundedIcon />
+                  )}
+                </Fab>
+              </Tooltip>
+
+              {/* Audio Mute/Unmute */}
+              <Tooltip title="Audio ON/OFF">
+                <Fab
+                  className={classes.floatingButton}
+                  onClick={this.muteAudio}
+                  color="inherit"
+                >
+                  {isAudioMuted ? (
+                    <VolumeOffRoundedIcon />
+                  ) : (
+                    <VolumeUpRoundedIcon />
+                  )}
+                </Fab>
+              </Tooltip>
+
+              {/* Leave Room */}
+              <Tooltip title="Leave Room">
+                <Fab
+                  onClick={this.leaveRoom}
+                  className={classes.floatingButton}
+                  color="secondary"
+                >
+                  <ExitToAppRoundedIcon />
+                </Fab>
+              </Tooltip>
+            </div>
+
+            {/* Locale Video */}
+            <Video isLocalUser id="localVideo" user_full_name={userFullName} />
+
+            {/* Remote Videos */}
+            <div className={classes.videoGrid}>
+              {peersEstablished.map((userPeer, index) => (
+                <Video
+                  key={index}
+                  id={`remote-${userPeer.user_id}`}
+                  user_id={userPeer.user_id}
+                  user_full_name={userPeer.user_full_name}
+                  peer={userPeer.peer}
+                />
+              ))}
+            </div>
+          </>
+        ) : (
+          // Error displayed if something goes wrong
+          <Alert className={classes.alert} severity="error">
+            This room is not accessible. Please make sure you enabled your media
+            devices
+          </Alert>
+        )}
       </div>
     );
   }
 }
 
-export default VideoRoom;
+export default withStyles(videoRoomStyles)(VideoRoom);

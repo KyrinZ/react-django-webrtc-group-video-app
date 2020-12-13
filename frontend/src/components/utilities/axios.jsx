@@ -1,9 +1,10 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://127.0.0.1:8000/api/";
+// Utility functions, constants, objects...
+import { BASE_API_URL } from "./CONSTANTS";
 
 const axiosInstance = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: BASE_API_URL,
   timeout: 5000,
   headers: {
     "Content-Type": "application/json",
@@ -11,19 +12,25 @@ const axiosInstance = axios.create({
     Authorization: "Bearer " + localStorage.getItem("access_token"),
   },
 });
+export default axiosInstance;
 
-const getRoomsList = (axiosInstance) => {
+export const getRoomsList = (axiosInstance, search = "") => {
   delete axiosInstance.defaults.headers["Authorization"];
-  return axiosInstance.get("events/");
+
+  if (search !== "") {
+    return axiosInstance.get(`rooms/?search=${search}`);
+  }
+
+  return axiosInstance.get("rooms/");
 };
 
-const validateToken = (axiosInstance, token) => {
+export const validateToken = (axiosInstance, token) => {
   return axiosInstance.post("token/verify/", {
     token: token,
   });
 };
 
-const refreshingAccessToken = () => {
+export const refreshingAccessToken = () => {
   const access_token = localStorage.getItem("access_token");
   validateToken(axiosInstance, access_token)
     .then((response) => {
@@ -51,11 +58,7 @@ const refreshingAccessToken = () => {
           })
           .catch((err) => {
             console.log(err.message);
-            this.printFeedback({ type: "error", feedbackMsg: err.message });
           });
       }
     });
 };
-
-export { getRoomsList, validateToken, refreshingAccessToken };
-export default axiosInstance;
