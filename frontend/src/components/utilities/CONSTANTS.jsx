@@ -1,5 +1,5 @@
+// export const BASE_API_URL = window.location.origin + "/api/";
 export const BASE_API_URL = "http://127.0.0.1:8000/api/";
-
 export const webSocketUrl = () => {
   let websocketProtocol;
   if (window.location.protocol === "https:") {
@@ -7,6 +7,7 @@ export const webSocketUrl = () => {
   } else {
     websocketProtocol = "ws://";
   }
+  // return websocketProtocol + window.location.host + "/video/";
   return websocketProtocol + "127.0.0.1:8000/video/";
 };
 

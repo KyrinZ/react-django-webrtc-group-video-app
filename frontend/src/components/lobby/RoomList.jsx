@@ -2,6 +2,7 @@ import React, { Component } from "react";
 
 // Material UI components
 import Modal from "@material-ui/core/Modal";
+import Alert from "@material-ui/lab/Alert";
 
 // Components
 import Room from "./Room";
@@ -98,7 +99,7 @@ class RoomList extends Component {
         <div style={{ marginTop: "1rem" }}>
           {loadingRooms ? (
             <Loading />
-          ) : (
+          ) : roomListData.length > 0 ? (
             roomListData.map((data) => {
               return (
                 <React.Fragment key={data.id}>
@@ -111,6 +112,8 @@ class RoomList extends Component {
                 </React.Fragment>
               );
             })
+          ) : (
+            <Alert severity="info">No Rooms Yet!!</Alert>
           )}
         </div>
       </>

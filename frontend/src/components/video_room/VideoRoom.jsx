@@ -353,6 +353,8 @@ export class VideoRoom extends Component {
       isAudioMuted,
       peersEstablished,
     } = this.state;
+
+    console.log(peersEstablished);
     const { userFullName } = this.context;
     const { classes } = this.props;
     return (
@@ -408,15 +410,19 @@ export class VideoRoom extends Component {
 
             {/* Remote Videos */}
             <div className={classes.videoGrid}>
-              {peersEstablished.map((userPeer, index) => (
-                <Video
-                  key={index}
-                  id={`remote-${userPeer.user_id}`}
-                  user_id={userPeer.user_id}
-                  user_full_name={userPeer.user_full_name}
-                  peer={userPeer.peer}
-                />
-              ))}
+              {peersEstablished.length > 1 ? (
+                peersEstablished.map((userPeer, index) => (
+                  <Video
+                    key={index}
+                    id={`remote-${userPeer.user_id}`}
+                    user_id={userPeer.user_id}
+                    user_full_name={userPeer.user_full_name}
+                    peer={userPeer.peer}
+                  />
+                ))
+              ) : (
+                <Alert severity="info">No one joined yet!!</Alert>
+              )}
             </div>
           </>
         ) : (

@@ -17,6 +17,13 @@ import {
 } from "../utilities";
 import formStyles from "./form_styles";
 
+const passwordHelperText = [
+  "Your password can’t be too similar to your other personal information.",
+  "Your password must contain at least 8 characters.",
+  "Your password can’t be a commonly used password. ",
+  "Your password can’t be entirely numeric.",
+];
+
 class Register extends Component {
   constructor(props) {
     super(props);
@@ -119,7 +126,6 @@ class Register extends Component {
                 required
                 error={errors.email && touched.email}
               />
-
               <FormikUIField
                 name="password"
                 label="Password"
@@ -128,6 +134,9 @@ class Register extends Component {
                 required
                 error={errors.password && touched.password}
               />
+              {passwordHelperText.map((text, index) => (
+                <FormHelperText key={index}>{text}</FormHelperText>
+              ))}
 
               {/* Password */}
               <FormikUIField
@@ -138,7 +147,9 @@ class Register extends Component {
                 required
                 error={errors.confirmation && touched.confirmation}
               />
-
+              <FormHelperText>
+                Enter the same password as before, for verification.
+              </FormHelperText>
               {/* Server Errors */}
               {this.state.serverErrors
                 ? this.state.serverErrors.map((error, index) => (

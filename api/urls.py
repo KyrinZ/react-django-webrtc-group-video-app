@@ -8,7 +8,6 @@ from .views import RegisterAndObtainTokenView, RoomViewSet, TokenObtainPairView
 router = routers.DefaultRouter()
 router.register(r"rooms", RoomViewSet)
 urlpatterns = router.urls
-
 # Authentications Urls
 urlpatterns += [
     path("user/create/", RegisterAndObtainTokenView.as_view(), name="create_user"),
