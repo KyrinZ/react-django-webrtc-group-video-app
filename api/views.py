@@ -9,13 +9,13 @@ from .models import Room
 from .serializers import (
     RoomSerializer,
     TokenObtainPairSerializer,
-    UserSerializerWithToken,
+    RegisterTokenSerializer,
 )
 
 
 class TokenObtainPairView(OriginalObtainPairView):
     """
-    Custom view for obtaining token pair
+    Replacing old 'serializer_class' with modified serializer class
     """
 
     serializer_class = TokenObtainPairSerializer
@@ -31,7 +31,10 @@ class RegisterAndObtainTokenView(APIView):
     authentication_classes = []
 
     def post(self, request, format="json"):
-        serializer = UserSerializerWithToken(data=request.data)
+
+        # User data is added to serializer class
+        serializer = RegisterTokenSerializer(data=request.data)
+
         if serializer.is_valid():
             user = serializer.save()
             if user:
@@ -49,7 +52,11 @@ class RoomViewSet(viewsets.ModelViewSet):
     serializer_class = RoomSerializer
 
     def get_queryset(self):
+
+        # By default list of rooms return
         queryset = Room.objects.all().order_by("-created_on")
+
+        # If search params is given then list matching the param is returned
         search = self.request.query_params.get("search", None)
         if search is not None:
             queryset = Room.objects.filter(title__icontains=search).order_by(

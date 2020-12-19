@@ -26,6 +26,7 @@ class Login extends Component {
     this.onSubmitLoginForm = this.onSubmitLoginForm.bind(this);
   }
 
+  // Submission form
   onSubmitLoginForm(data) {
     const userData = {
       email: data.email,
@@ -37,19 +38,27 @@ class Login extends Component {
       authenticateUser,
       printFeedback,
     } = this.props;
+
+    // Sends post requests
     axiosInstance
       .post("token/", userData)
       .then(({ data }) => {
+        // Tokens are added to headers upcoming requests
+        // And they stored in local storage
         axiosInstance.defaults.headers["Authorization"] =
           "Bearer " + data.access;
         localStorage.setItem("access_token", data.access);
         localStorage.setItem("refresh_token", data.refresh);
+
+        // User is then authenticated and redirected to lobby with print feedback message
         authenticateUser();
         history.push(redirectPath);
         printFeedback({ type: "success", feedbackMsg: "You are logged in" });
       })
       .catch((error) => {
         console.log(error.message);
+
+        // Server error is set to state to display down in component
         if (error.response) {
           this.setState({
             serverErrors: Object.values(error.response.data),
@@ -106,6 +115,7 @@ class Login extends Component {
                   ))
                 : null}
 
+              {/* Login Button */}
               <Button
                 fullWidth
                 className={classes.formButton}
@@ -116,6 +126,8 @@ class Login extends Component {
               >
                 Login
               </Button>
+
+              {/* Link to registor page */}
               <Typography display="block" variant="caption">
                 not a member?
                 <RouterUILink linkTo="/register" innerText="Register" />

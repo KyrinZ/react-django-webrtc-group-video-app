@@ -35,13 +35,12 @@ class NavigationBar extends Component {
 
   // Title changes based on what url path user is on
   changePageTitle = () => {
-    const currentUrlPath = window.location.pathname;
+    const currentUrlPath = this.props.location.pathname;
     const { LOBBY_PATH, LOGIN_PATH, REGISTER_PATH } = AVAILABLE_PATHS;
 
     const { LOBBY_TITLE, LOGIN_TITLE, REGISTER_TITLE } = ALL_PATH_TITLES;
 
     let pageTitle;
-
     switch (currentUrlPath) {
       case LOBBY_PATH:
         pageTitle = LOBBY_TITLE;
@@ -75,8 +74,8 @@ class NavigationBar extends Component {
     });
   };
 
-  // Logic to handle for each of the items in menu
-  gotoSection = (event) => {
+  // Logic to handle each menu item's action
+  menuAction = (event) => {
     const { history, authenticateUser, printFeedback } = this.props;
     const { menu } = event.currentTarget.dataset;
     const { LOBBY_PATH, LOGIN_PATH, REGISTER_PATH } = AVAILABLE_PATHS;
@@ -131,14 +130,17 @@ class NavigationBar extends Component {
     }
   };
 
+  // This method fires when the component mounts
   componentDidMount = () => {
     this.showComponents();
   };
 
+  // And if the route is changed
   componentDidUpdate(prevProps) {
     if (this.props.location !== prevProps.location) {
-      this.changePageTitle();
+      console.log('pass');
       this.showComponents();
+      this.changePageTitle();
     }
   }
 
@@ -161,9 +163,12 @@ class NavigationBar extends Component {
       <div className={classes.root}>
         <AppBar className={classes.appBar} position="static">
           <Toolbar>
+            {/* Page Title */}
             <Typography className={classes.pageTitle} variant="h6">
               {pageTitle}
             </Typography>
+
+            {/* Search Bar */}
             {isComponentShown ? (
               <div className={classes.search}>
                 <div className={classes.searchIcon}>
@@ -181,6 +186,7 @@ class NavigationBar extends Component {
               </div>
             ) : null}
 
+            {/* Create room button */}
             <div className={classes.root} />
             {isComponentShown ? (
               <Tooltip title="Create Room">
@@ -190,9 +196,12 @@ class NavigationBar extends Component {
               </Tooltip>
             ) : null}
 
+            {/* User full name */}
             <Typography className={classes.username} variant="subtitle1">
               {userFullName && userFullName !== "" ? userFullName : "Anonymous"}
             </Typography>
+
+            {/* Menus */}
             <Tooltip title="Menu">
               <IconButton
                 onClick={this.handleMenuOpen}
@@ -208,13 +217,13 @@ class NavigationBar extends Component {
               transformOrigin={{ vertical: "top", horizontal: "right" }}
               keepMounted
               open={Boolean(anchorEl)}
-              onClose={this.gotoSection}
+              onClose={this.menuAction}
             >
               {menuItems.map((items, index) => (
                 <MenuItem
                   key={index}
                   data-menu={items}
-                  onClick={this.gotoSection}
+                  onClick={this.menuAction}
                 >
                   {items}
                 </MenuItem>

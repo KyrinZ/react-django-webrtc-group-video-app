@@ -3,13 +3,19 @@ import React, { Component } from "react";
 // Material UI components
 import Modal from "@material-ui/core/Modal";
 import Alert from "@material-ui/lab/Alert";
+import Typography from "@material-ui/core/Typography";
 
 // Components
 import Room from "./Room";
 import CreateRoomForm from "./RoomForm/CreateRoomForm";
 
 // Utility components, functions, constants, objects...
-import { axiosInstance, Loading, refreshingAccessToken } from "../utilities/";
+import {
+  axiosInstance,
+  Loading,
+  refreshingAccessToken,
+  UserInfoContext, RouterUILink
+} from "../utilities/";
 
 class RoomList extends Component {
   constructor(props) {
@@ -19,6 +25,8 @@ class RoomList extends Component {
     this.enterRoom = this.enterRoom.bind(this);
     this.onRoomFormSubmit = this.onRoomFormSubmit.bind(this);
   }
+  // User information
+  static contextType = UserInfoContext;
 
   // Creating Room form
   onRoomFormSubmit = async (data, { resetForm }) => {
@@ -30,7 +38,7 @@ class RoomList extends Component {
     };
     const { printFeedback, closeRoomForm } = this.props;
 
-    // First refreshes JWT access token stored in local storage if it is invalid
+    // First refreshes JWT access token stored in local storage if access token is invalid
     await refreshingAccessToken();
 
     // Then posts the data to backend with the valid access token in the header
@@ -90,12 +98,25 @@ class RoomList extends Component {
       loadingRooms,
       printFeedback,
     } = this.props;
+
+   
+    const { isUserLoggedIn, isDataArrived } = this.context;
     return (
       <>
+      {/* Create Room Form */}
         <Modal disableAutoFocus open={isRoomFormOpen} onClose={closeRoomForm}>
           <CreateRoomForm onRoomFormSubmit={this.onRoomFormSubmit} />
         </Modal>
 
+        {/* User not authentication alert */}
+        {!isUserLoggedIn && isDataArrived ? (
+          <div style={{ textAlign: "center", margin: "1rem 0" }}>
+            <Typography> Please <RouterUILink linkTo="/login" innerText="Login" /> Or <RouterUILink linkTo="/register" innerText="Register" /> to create or enter room</Typography>
+          </div>
+        ) : null}
+
+
+          {/* List of Rooms */}
         <div style={{ marginTop: "1rem" }}>
           {loadingRooms ? (
             <Loading />

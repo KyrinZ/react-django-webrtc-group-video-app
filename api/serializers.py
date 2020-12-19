@@ -13,7 +13,7 @@ from .models import Room, User
 
 class TokenObtainPairSerializer(OriginalObtainPairSerializer):
     """
-    Custom Token pair generator
+    Custom Token pair generator, Added full_name field to tokens to access it on a frontend
     """
 
     @classmethod
@@ -23,9 +23,9 @@ class TokenObtainPairSerializer(OriginalObtainPairSerializer):
         return token
 
 
-class UserSerializerWithToken(serializers.ModelSerializer):
+class RegisterTokenSerializer(serializers.ModelSerializer):
     """
-    User register serializer
+    User registers through this serializer an receive tokens for authentication
     """
 
     first_name = serializers.CharField(required=True)

@@ -3,7 +3,7 @@ import { Route, Redirect } from "react-router-dom";
 
 import { AVAILABLE_PATHS } from "../utilities/CONSTANTS";
 
-// User is redirected to home if user is already authenticated
+// Custom Route for redirecting user to home if they are already authenticated
 function AuthenticationRoute(props) {
   const { component: Component, authenticationProps, ...restOfProps } = props;
   return (

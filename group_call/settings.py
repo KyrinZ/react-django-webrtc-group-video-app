@@ -60,7 +60,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "video_conference.urls"
+ROOT_URLCONF = "group_call.urls"
 
 TEMPLATES = [
     {
@@ -78,7 +78,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "video_conference.wsgi.application"
+WSGI_APPLICATION = "group_call.wsgi.application"
 
 
 # Database
@@ -130,6 +130,7 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 
+# Added custom conf
 STATICFILES_DIRS = [BASE_DIR / "frontend/build/static"]
 
 
@@ -157,5 +158,8 @@ REST_FRAMEWORK = {
 # Custom User Model
 AUTH_USER_MODEL = "api.User"
 
-ASGI_APPLICATION = "video_conference.asgi.application"
+# Pointing to channels to routing configurations
+ASGI_APPLICATION = "group_call.asgi.application"
+
+# Assigning in memory channel layer
 CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}

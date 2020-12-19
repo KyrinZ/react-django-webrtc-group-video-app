@@ -55,17 +55,16 @@ class Room(models.Model):
     Room Model for group calling
     """
 
-    EVENT_TYPE = [
+    ROOM_TYPE = [
         ("OTA", "Open to all"),
         ("IO", "Invite only"),
-        ("L", "Locked"),
     ]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     description = models.TextField(default="")
     type_of = models.CharField(
         max_length=3,
-        choices=EVENT_TYPE,
+        choices=ROOM_TYPE,
         default="OTA",
     )
     created_on = models.DateTimeField(auto_now_add=True)

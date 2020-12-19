@@ -32,7 +32,9 @@ class Register extends Component {
     };
     this.onSubmitRegisterForm = this.onSubmitRegisterForm.bind(this);
   }
-  onSubmitRegisterForm(data, { resetForm }) {
+
+  // Submission form
+  onSubmitRegisterForm(data) {
     const userData = {
       email: data.email,
       firstName: data.firstName,
@@ -45,14 +47,19 @@ class Register extends Component {
       authenticateUser,
       printFeedback,
     } = this.props;
+
+    // Sends post requests
     axiosInstance
       .post("user/create/", userData)
       .then(({ data: { tokens } }) => {
+        // Tokens are added to headers upcoming requests
+        // And they stored in local storage
         axiosInstance.defaults.headers["Authorization"] =
           "Bearer " + tokens.access;
         localStorage.setItem("access_token", tokens.access);
         localStorage.setItem("refresh_token", tokens.refresh);
 
+        // User is then authenticated and redirected to lobby with print feedback message
         authenticateUser();
         history.push(redirectPath);
         printFeedback({
@@ -62,15 +69,14 @@ class Register extends Component {
       })
       .catch((error) => {
         console.log(error.message);
+
+        // Server error is set to state to display down in component
         if (error.response) {
           this.setState({
             serverErrors: Object.values(error.response.data),
           });
         }
       });
-
-    resetForm();
-    // Sending Login credentials and receiving Tokens
   }
 
   render() {
@@ -159,6 +165,7 @@ class Register extends Component {
                   ))
                 : null}
 
+              {/* Register Button */}
               <Button
                 fullWidth
                 className={classes.formButton}
@@ -169,6 +176,8 @@ class Register extends Component {
               >
                 Register
               </Button>
+
+              {/* Link to Login page */}
               <Typography display="block" variant="caption">
                 already have an account?
                 <RouterUILink linkTo="/login" innerText="Log In" />

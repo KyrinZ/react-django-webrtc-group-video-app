@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { BrowserRouter as Router, Switch } from "react-router-dom";
+import { HashRouter as Router, Switch } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 
 // Components
@@ -29,6 +29,7 @@ export class Routes extends Component {
     super(props);
 
     this.state = {
+      // User information
       userData: {
         isDataArrived: false,
         userId: null,
@@ -37,10 +38,12 @@ export class Routes extends Component {
       },
       isRoomFormOpen: false,
 
+      // For Feedback method
       severity: "",
       feedbackMsg: "",
       isFeedbackOpen: false,
 
+      // Related to room list
       roomListData: [],
       loadingRooms: true,
       search: "",
@@ -55,12 +58,16 @@ export class Routes extends Component {
     this.authenticateUser = this.authenticateUser.bind(this);
   }
 
-  loadRooms(search = "") {
+  // Method to load all the rooms
+  loadRooms = (search = "") => {
     this.setState({
       loadingRooms: true,
     });
     getRoomsList(axiosInstance, search)
       .then((res) => {
+        const access_token = localStorage.getItem("access_token");
+        axiosInstance.defaults.headers["Authorization"] =
+          "Bearer " + access_token;
         this.setState(() => ({ roomListData: res.data, loadingRooms: false }));
       })
       .catch((error) => {
@@ -68,8 +75,9 @@ export class Routes extends Component {
         this.printFeedback({ type: "error", feedbackMsg: error.message });
         console.log(error.message);
       });
-  }
+  };
 
+  // Method runs whenever search is used
   handleSearchChanges = async (event) => {
     await this.setState({
       search: event.target.value,
@@ -88,6 +96,7 @@ export class Routes extends Component {
     });
   }
 
+  // Method for printing feedback to user
   printFeedback = ({ type, feedbackMsg }) => {
     switch (type) {
       case "success":
@@ -109,6 +118,7 @@ export class Routes extends Component {
     }
   };
 
+  // Closing feedback message
   closeFeedback = (event, reason) => {
     if (reason === "clickaway") {
       return;
@@ -119,6 +129,8 @@ export class Routes extends Component {
     });
   };
 
+  // Checks whether is logged in or not
+  // Depending upon that userData is populated
   authenticateUser = () => {
     const refresh_token = localStorage.getItem("refresh_token");
     validateToken(axiosInstance, refresh_token)
@@ -153,6 +165,7 @@ export class Routes extends Component {
   };
 
   componentDidMount = () => {
+    // checks authentication when components mounts
     this.authenticateUser();
   };
   render() {
@@ -197,7 +210,8 @@ export class Routes extends Component {
 
     return userData.isDataArrived ? (
       <UserInfoProvider userData={userData}>
-        <Router>
+        <Router basename="/app">
+          {/* Nav */}
           <NavigationBar {...navProps} />
           <Feedback
             closeFeedback={this.closeFeedback}
@@ -206,19 +220,25 @@ export class Routes extends Component {
             feedbackMsg={feedbackMsg}
           />
           <Switch>
+            {/* Lobby */}
             <LobbyRoute exact path={LOBBY_PATH} lobbyProps={lobbyProps} />
+
+            {/* Login */}
             <AuthenticationRoute
               exact
               path={LOGIN_PATH}
               component={Login}
               authenticationProps={authenticationProps}
             />
+            {/* Register */}
             <AuthenticationRoute
               exact
               path={REGISTER_PATH}
               component={Register}
               authenticationProps={authenticationProps}
             />
+
+            {/* Video Room */}
             <VideoRoomRoute
               exact
               path={VIDEO_ROOM_PATH}

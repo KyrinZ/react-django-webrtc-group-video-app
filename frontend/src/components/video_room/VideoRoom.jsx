@@ -354,7 +354,6 @@ export class VideoRoom extends Component {
       peersEstablished,
     } = this.state;
 
-    console.log(peersEstablished);
     const { userFullName } = this.context;
     const { classes } = this.props;
     return (
