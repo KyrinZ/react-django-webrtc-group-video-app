@@ -10,10 +10,8 @@ django-cors-headers = "*"
 djangorestframework-camel-case = "*"
 djangorestframework-simplejwt = "*"
 channels = "*"
-Pillow = "*"
 
 [dev-packages]
-httpie = "*"
 
 [requires]
 python_version = "3.8"
