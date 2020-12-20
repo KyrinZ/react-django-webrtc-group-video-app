@@ -16,12 +16,12 @@ export class Video extends Component {
     };
   }
 
+// These Hover method is just for style purposes
   mouseHoverIn = () => {
     this.setState({
       isMouseHovering: true,
     });
   };
-
   mouseHoverOut = () => {
     this.setState({
       isMouseHovering: false,

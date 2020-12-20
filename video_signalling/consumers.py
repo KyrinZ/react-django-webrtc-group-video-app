@@ -149,3 +149,5 @@ class VideoConsumer(AsyncWebsocketConsumer):
                 return user
 
         return None
+
+

@@ -130,7 +130,7 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 
-# Added custom conf
+# ADDED CUSTOM CONFIGURATION
 STATICFILES_DIRS = [BASE_DIR / "frontend/build/static"]
 
 

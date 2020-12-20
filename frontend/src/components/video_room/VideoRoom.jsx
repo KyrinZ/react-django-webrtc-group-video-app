@@ -53,7 +53,6 @@ export class VideoRoom extends Component {
       isAudioMuted: !stream.getAudioTracks()[0].enabled,
     });
   };
-
   leaveRoom = () => {
     const { history } = this.props;
     history.push(AVAILABLE_PATHS.LOBBY_PATH);
@@ -61,6 +60,8 @@ export class VideoRoom extends Component {
 
   // Creates offer to send it to other user in the room
   CreatePeer = (currentUserId, otherUserId, currentUserStream = null) => {
+
+    // User creates peer as initiator
     const peer = new Peer({
       initiator: true,
       trickle: false,
@@ -79,6 +80,7 @@ export class VideoRoom extends Component {
       );
     });
 
+    // Peer is then returned
     return peer;
   };
 
@@ -89,16 +91,19 @@ export class VideoRoom extends Component {
     receivedOffer,
     currentUserStream = null
   ) => {
+
+    // User creates peer but not as an initiator 
     const peer = new Peer({
       initiator: false,
       trickle: false,
       stream: currentUserStream,
     });
 
-    // Offer is set as remote description
+
+    // The offer that was sent is set as remote description
     peer.signal(receivedOffer);
 
-    // Answer is sent
+    // Answer is sent back to the user who sent the offer
     peer.on("signal", (signal) => {
       this.state.websocket.send(
         JSON.stringify({
@@ -109,10 +114,12 @@ export class VideoRoom extends Component {
         })
       );
     });
+
+     // Peer is then returned
     return peer;
   };
 
-  // Function to send offers to each users that are connected to the room
+  // Function to send offers to each users as initiator that are connected to the room
   sendSignalsToAll = (currentUserId, stream = null) => {
     const peers = [];
     this.state.usersConnected.forEach((otherUser) => {
@@ -147,6 +154,7 @@ export class VideoRoom extends Component {
       });
       return;
     }
+    // Extracting current user info
     const { userId, userFullName } = this.context;
 
     // Websocket connection is made

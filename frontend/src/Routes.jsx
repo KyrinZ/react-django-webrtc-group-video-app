@@ -49,12 +49,19 @@ export class Routes extends Component {
       search: "",
     };
 
+    // Loading list of rooms
     this.loadRooms = this.loadRooms.bind(this);
     this.handleSearchChanges = this.handleSearchChanges.bind(this);
+
+    // Opening and closing of form
     this.closeRoomForm = this.closeRoomForm.bind(this);
     this.openRoomForm = this.openRoomForm.bind(this);
+
+    // Feedback messages
     this.printFeedback = this.printFeedback.bind(this);
     this.closeFeedback = this.closeFeedback.bind(this);
+
+    // User authentication and refreshing access token
     this.authenticateUser = this.authenticateUser.bind(this);
   }
 
@@ -133,6 +140,8 @@ export class Routes extends Component {
   // Depending upon that userData is populated
   authenticateUser = () => {
     const refresh_token = localStorage.getItem("refresh_token");
+
+    // Checks the refresh token is valid which then determines whether user is logged-in or not
     validateToken(axiosInstance, refresh_token)
       .then((response) => {
         if (response.status === 200) {
@@ -146,6 +155,8 @@ export class Routes extends Component {
               isUserLoggedIn: true,
             },
           });
+
+          // If the refresh token is valid then access token is refreshed
           refreshingAccessToken();
         }
       })
