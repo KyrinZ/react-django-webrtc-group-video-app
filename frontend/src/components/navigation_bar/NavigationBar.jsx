@@ -138,7 +138,6 @@ class NavigationBar extends Component {
   // And if the route is changed
   componentDidUpdate(prevProps) {
     if (this.props.location !== prevProps.location) {
-      console.log('pass');
       this.showComponents();
       this.changePageTitle();
     }

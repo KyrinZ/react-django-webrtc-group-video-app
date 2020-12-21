@@ -417,7 +417,7 @@ export class VideoRoom extends Component {
 
             {/* Remote Videos */}
             <div className={classes.videoGrid}>
-              {peersEstablished.length > 1 ? (
+              {peersEstablished.length > 0 ? (
                 peersEstablished.map((userPeer, index) => (
                   <Video
                     key={index}
