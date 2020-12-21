@@ -77,7 +77,8 @@ Let's start with *video_signalling/routing.py*. Just like *'urls.py'* for HTTP p
 
 *'video_signalling/consumers.py'* file has only one giant class *'VideoConsumer'* that inherits from *'AsyncWebsocketConsumer'* (which makes all the task asynchronous) that deals with web-socket connect, disconnect, send, and receiving message logic. You can see at the top I defined a class variable, *'USERS_CONNECTED'* which is a list to store users and this variable will be passed to all the users in the room whenever a user connects or disconnects so they store it in their React state and that way all users keep tab of how many users are there in a room. 
 
-    Note that storing users in *'USERS_CONNECTED'* is not the same as adding users to the room which is done in a separate method given by Django Channels inside ‘connect’ method .
+
+> Note that storing users in *'USERS_CONNECTED'* is not the same as adding users to the room which is done in a separate method given by Django Channels inside ‘connect’ method .
 
 The first three methods *‘connect’*, *‘disconnect’*, and *‘receive’* are like events that happen when a user connects to, disconnect from, or sends messages to the web-socket. The rest of the methods are used to send a group message to all users in the rooms.
 
@@ -157,7 +158,7 @@ This file holds all of my reusable functions, constants, and components that I u
 * Inside *'frontend/src/components/utilities/components'* all my reusable components live that I use across the app
 
 
-      There is one component in particular I needed to mention though, that is 'UserInfoProvider' which is a context provider for the whole app so that I can distribute user info (User id and user full name) across the app for easy access. This provider wraps the whole app inside 'Routes' component. The value for the provider is also filled inside 'Routes' with the help of 'authenticateUser' method.
+> There is one component in particular I needed to mention though, that is 'UserInfoProvider' which is a context provider for the whole app so that I can distribute user info (User id and user full name) across the app for easy access. This provider wraps the whole app inside 'Routes' component. The value for the provider is also filled inside 'Routes' with the help of 'authenticateUser' method.
 
 ![Navigation folder file structure](./readme_screenshots/screenshot15.png)
 
