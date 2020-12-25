@@ -194,7 +194,7 @@ export class VideoRoom extends Component {
             navigator.mediaDevices
               .getUserMedia({
                 video: true,
-                audio: false,
+                audio: true,
               })
               .then((stream) => {
                 this.setState({ stream: stream });
@@ -220,7 +220,7 @@ export class VideoRoom extends Component {
             );
             printFeedback({
               type: "success",
-              feedbackMsg: `User No. ${user.user_full_name} joined this room`,
+              feedbackMsg: `${user.user_full_name} joined this room`,
             });
             console.log(`User No. ${data.from} joined this room`);
           }
@@ -299,7 +299,7 @@ export class VideoRoom extends Component {
               console.log(`User No. ${data.from} disconnected`);
               printFeedback({
                 type: "error",
-                feedbackMsg: `User No. ${user.user_full_name} left`,
+                feedbackMsg: `${user.user_full_name} left`,
               });
 
               // Peer associated with the user that just disconnected is destroyed

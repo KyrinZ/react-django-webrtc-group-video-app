@@ -82,7 +82,7 @@ class CreateRoomForm extends Component {
               {/* Room type */}
               <FormikUISelect
                 name="typeOf"
-                label="Event type"
+                label="Room type"
                 items={this.roomTypes}
                 error={errors.typeOf || touched.typeOf}
                 required
