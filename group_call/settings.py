@@ -83,6 +83,14 @@ WSGI_APPLICATION = "group_call.wsgi.application"
 
 DATABASES = {
     "default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}
+    # "default": {
+    #     "ENGINE": "django.db.backends.postgresql",
+    #     "NAME": "d4u365fe8gdgo4",
+    #     "USER": "lidwmpgqxgssok",
+    #     "PASSWORD": "eb08865dc75d3a5b6f69e23d5f9fbd3b9c952ce02bdc7f9e8eca9d2d75a8e6ee",
+    #     "HOST": "ec2-52-44-46-66.compute-1.amazonaws.com",
+    #     "PORT": "5432",
+    # }
 }
 
 
