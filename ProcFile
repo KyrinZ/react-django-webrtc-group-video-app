@@ -1,1 +1,1 @@
-web: gunicorn myproject.wsgi
+web: gunicorn group_call.wsgi
