@@ -12,9 +12,6 @@
 /frontend/coverage
 
 
-# production
-/frontend/build
-
 # misc
 .DS_Store
 .env.local
@@ -57,7 +54,6 @@ media
 
 # Distribution / packaging
 .Python
-build/
 develop-eggs/
 dist/
 downloads/
