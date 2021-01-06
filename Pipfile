@@ -13,6 +13,7 @@ channels = "*"
 gunicorn = "*"
 whitenoise = "*"
 psycopg2-binary = "*"
+channels-redis = "*"
 
 [dev-packages]
 
