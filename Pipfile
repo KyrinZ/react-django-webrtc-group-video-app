@@ -12,6 +12,7 @@ djangorestframework-simplejwt = "*"
 channels = "*"
 gunicorn = "*"
 whitenoise = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 
