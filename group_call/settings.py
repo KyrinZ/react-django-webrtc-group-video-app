@@ -83,18 +83,18 @@ WSGI_APPLICATION = "group_call.wsgi.application"
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    },
     # "default": {
-    #     "ENGINE": "django.db.backends.postgresql",
-    #     "NAME": "ddsurvn6a0keda",
-    #     "USER": "wktfcoflzjkrhv",
-    #     "PASSWORD": "3e3c6b16f4b757b2fb95333b7dc728bbe4b864fc3f3cc5516d58a8de1701ee17",
-    #     "HOST": "ec2-52-44-46-66.compute-1.amazonaws.com",
-    #     "PORT": "5432",
-    # }
+    #     "ENGINE": "django.db.backends.sqlite3",
+    #     "NAME": BASE_DIR / "db.sqlite3",
+    # },
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "d8t73d6vdemigj",
+        "USER": "mlcpytqnprjars",
+        "PASSWORD": "5dd3f3533b18cfd2ab0966b2d311ca7025fc939d25545b50128d650e7491c2ad",
+        "HOST": "ec2-52-44-139-108.compute-1.amazonaws.com",
+        "PORT": "5432",
+    }
 }
 
 
