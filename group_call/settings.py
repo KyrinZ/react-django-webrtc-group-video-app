@@ -83,18 +83,18 @@ WSGI_APPLICATION = "group_call.wsgi.application"
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    },
     # "default": {
-    #     "ENGINE": "django.db.backends.postgresql",
-    #     "NAME": "d8t73d6vdemigj",
-    #     "USER": "mlcpytqnprjars",
-    #     "PASSWORD": "5dd3f3533b18cfd2ab0966b2d311ca7025fc939d25545b50128d650e7491c2ad",
-    #     "HOST": "ec2-52-44-139-108.compute-1.amazonaws.com",
-    #     "PORT": "5432",
-    # }
+    #     "ENGINE": "django.db.backends.sqlite3",
+    #     "NAME": BASE_DIR / "db.sqlite3",
+    # },
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "d8t73d6vdemigj",
+        "USER": "mlcpytqnprjars",
+        "PASSWORD": "5dd3f3533b18cfd2ab0966b2d311ca7025fc939d25545b50128d650e7491c2ad",
+        "HOST": "ec2-52-44-139-108.compute-1.amazonaws.com",
+        "PORT": "5432",
+    }
 }
 
 
@@ -160,11 +160,11 @@ AUTH_USER_MODEL = "api.User"
 ASGI_APPLICATION = "group_call.asgi.application"
 
 # Assigning in memory channel layer
-CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
+# CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
 
-# CHANNEL_LAYERS = {
-#     "default": {
-#         "BACKEND": "channels_redis.core.RedisChannelLayer",
-#         "CONFIG": {"hosts": [os.environ.get("REDIS_URL", "redis://localhost:6379")]},
-#     }
-# }
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {"hosts": [os.environ.get("REDIS_URL", "redis://localhost:6379")]},
+    }
+}
