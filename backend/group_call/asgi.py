@@ -5,10 +5,9 @@ from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
 import video_signalling.routing
-import django
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "group_call.settings")
 
-django.setup()
 
 application = ProtocolTypeRouter(
     {
