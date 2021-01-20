@@ -98,7 +98,7 @@ class RoomList extends Component {
       loadingRooms,
       printFeedback,
     } = this.props;
-
+    console.log(roomListData);
     const { isUserLoggedIn, isDataArrived } = this.context;
     return (
       <>
