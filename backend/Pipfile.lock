@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "63abdd8d84eb6698c8c213dfc6e9e893e30d49028be5d3153476e9641fe432c4"
+            "sha256": "4e51aaa031a154f1240f7549489e695c2fb9690251efed9dab19d5ee20229530"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -115,6 +115,13 @@
             "index": "pypi",
             "version": "==3.2.0"
         },
+        "click": {
+            "hashes": [
+                "sha256:d2b5255c7c6349bc1bd1e59e08cd12acbbd63ce649f2588755783aa94dfb6b1a",
+                "sha256:dacca89f4bfadd5de3d7489b7c8a566eee0d3676333fbb50030263894c38c0dc"
+            ],
+            "version": "==7.1.2"
+        },
         "constantly": {
             "hashes": [
                 "sha256:586372eb92059873e29eba4f9dec8381541b4d3834660707faf8ba59146dfc35",
@@ -187,6 +194,13 @@
             ],
             "index": "pypi",
             "version": "==4.6.0"
+        },
+        "h11": {
+            "hashes": [
+                "sha256:36a3cb8c0a032f56e2da7084577878a035d3b61d104230d4bd49c0c6b555a9c6",
+                "sha256:47222cb6067e4a307d535814917cd98fd0a57b6788ce715755fa2b6c28b56042"
+            ],
+            "version": "==0.12.0"
         },
         "hiredis": {
             "hashes": [
@@ -468,6 +482,14 @@
                 "sha256:a8676d6c68aea1f0e2548c4afdb8e6253873af3bc2659bb5bcd9f39dff7ff90f"
             ],
             "version": "==20.12.1"
+        },
+        "uvicorn": {
+            "hashes": [
+                "sha256:1079c50a06f6338095b4f203e7861dbff318dde5f22f3a324fc6e94c7654164c",
+                "sha256:ef1e0bb5f7941c6fe324e06443ddac0331e1632a776175f87891c7bd02694355"
+            ],
+            "index": "pypi",
+            "version": "==0.13.3"
         },
         "zope.interface": {
             "hashes": [
