@@ -13,6 +13,7 @@ channels = "*"
 psycopg2-binary = "*"
 python-dotenv = "*"
 daphne = "*"
+channels-redis = "*"
 
 [dev-packages]
 
