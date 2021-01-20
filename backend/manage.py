@@ -7,8 +7,6 @@ import sys
 def main():
     """Run administrative tasks."""
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "group_call.settings")
-    import django
-    django.setup()
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
