@@ -142,8 +142,10 @@ if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
     CORS_ALLOW_ALL_ORIGINS = False
-    CORS_ALLOWED_ORIGIN_REGEXES = [
-        r"^https://\w+\.react-django-webrtc-group-video-app-\.app$",
+    CORS_ALLOWED_ORIGINS = [
+    "https://react-django-webrtc-group-video-app.vercel.app",
+    "https://react-django-webrtc-group-video-app.kyrinzero.vercel.app",
+    "https://react-django-webrtc-group-video-app-3p1glito8.vercel.app",
 ]
 
 REST_FRAMEWORK = {
