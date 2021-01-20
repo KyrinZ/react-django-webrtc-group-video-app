@@ -38,7 +38,10 @@ SECRET_KEY = os.environ['SECRET_KEY']
 if DEBUG:
     ALLOWED_HOSTS = ["*"]
 else:
-    ALLOWED_HOSTS = ["react-django-webrtc-group-video-app.vercel.app"]
+    ALLOWED_HOSTS = [
+        "django-group-call-api.herokuapp",
+        "react-django-webrtc-group-video-app.vercel" 
+    ]
 
 # Application definition
 INSTALLED_APPS = [
