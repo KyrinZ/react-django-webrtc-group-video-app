@@ -99,7 +99,6 @@ class RoomList extends Component {
       printFeedback,
     } = this.props;
 
-    console.log(roomListData);
     const { isUserLoggedIn, isDataArrived } = this.context;
     return (
       <>
