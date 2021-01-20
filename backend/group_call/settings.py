@@ -34,7 +34,8 @@ SECRET_KEY = os.environ['SECRET_KEY']
 
 if DEBUG:
     ALLOWED_HOSTS = ["*"]
-
+else:
+    ALLOWED_HOSTS = ["*"]
 
 # Application definition
 INSTALLED_APPS = [
@@ -69,7 +70,7 @@ ROOT_URLCONF = "group_call.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "frontend/build"],
+        "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -86,8 +87,6 @@ WSGI_APPLICATION = "group_call.wsgi.application"
 
 
 # Database
-# https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-
 if DEBUG:
     database =  {
         "ENGINE": "django.db.backends.sqlite3",
@@ -110,8 +109,6 @@ DATABASES = {
 
 
 # Password validation
-# https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
@@ -122,8 +119,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/3.1/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
 
@@ -136,13 +131,13 @@ USE_L10N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = "/static/"
 
 # ADDED CUSTOM CONFIGURATION
 if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
     CORS_ALLOW_ALL_ORIGINS = True
 
 REST_FRAMEWORK = {
