@@ -12,6 +12,7 @@ djangorestframework-simplejwt = "*"
 channels = "*"
 psycopg2-binary = "*"
 python-dotenv = "*"
+daphne = "*"
 
 [dev-packages]
 
