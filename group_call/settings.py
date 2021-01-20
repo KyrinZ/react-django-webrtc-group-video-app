@@ -12,21 +12,28 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "b__(vudc1hi2+6_%*@07cv@5i*%djsm!if=gc77&ussj0$xn%+"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+if DEBUG:
+    env_path = Path('.') / 'group_call/.env'
+    load_dotenv(dotenv_path=env_path)
+    
+SECRET_KEY = os.environ['SECRET_KEY']
+
+
+
+if DEBUG:
+    ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -55,7 +62,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 ROOT_URLCONF = "group_call.urls"
@@ -82,19 +88,24 @@ WSGI_APPLICATION = "group_call.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-DATABASES = {
-    # "default": {
-    #     "ENGINE": "django.db.backends.sqlite3",
-    #     "NAME": BASE_DIR / "db.sqlite3",
-    # },
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "d8t73d6vdemigj",
-        "USER": "mlcpytqnprjars",
-        "PASSWORD": "5dd3f3533b18cfd2ab0966b2d311ca7025fc939d25545b50128d650e7491c2ad",
-        "HOST": "ec2-52-44-139-108.compute-1.amazonaws.com",
-        "PORT": "5432",
+if DEBUG:
+    database =  {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
+else:
+    database = {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': env("DATABASE_NAME"),
+        'USER': env("DATABASE_USER"),
+        'PASSWORD': env("DATABASE_PASSWORD"),
+        'HOST': env("DATABASE_HOST"),
+        'PORT': env("DATABASE_PORT"),
+    }
+
+
+DATABASES = {
+    "default": database
 }
 
 
@@ -133,9 +144,8 @@ STATIC_URL = "/static/"
 # ADDED CUSTOM CONFIGURATION
 STATICFILES_DIRS = [BASE_DIR / "frontend/build/static"]
 
-
-CORS_ALLOW_ALL_ORIGINS = True
-
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -160,11 +170,8 @@ AUTH_USER_MODEL = "api.User"
 ASGI_APPLICATION = "group_call.asgi.application"
 
 # Assigning in memory channel layer
-# CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {"hosts": [os.environ.get("REDIS_URL", "redis://localhost:6379")]},
-    }
-}
+if DEBUG:
+    channel_layer =  {"BACKEND": "channels.layers.InMemoryChannelLayer"}
+else:
+    channel_layer = {}
+CHANNEL_LAYERS = {"default": channel_layer}

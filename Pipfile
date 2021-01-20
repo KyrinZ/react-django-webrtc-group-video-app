@@ -10,10 +10,8 @@ django-cors-headers = "*"
 djangorestframework-camel-case = "*"
 djangorestframework-simplejwt = "*"
 channels = "*"
-gunicorn = "*"
-whitenoise = "*"
 psycopg2-binary = "*"
-channels-redis = "*"
+python-dotenv = "*"
 
 [dev-packages]
 
