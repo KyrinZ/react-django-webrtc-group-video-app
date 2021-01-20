@@ -38,7 +38,7 @@ SECRET_KEY = os.environ['SECRET_KEY']
 if DEBUG:
     ALLOWED_HOSTS = ["*"]
 else:
-    ALLOWED_HOSTS = ["*"]
+    ALLOWED_HOSTS = ["react-django-webrtc-group-video-app.vercel.app"]
 
 # Application definition
 INSTALLED_APPS = [
@@ -141,7 +141,10 @@ STATIC_URL = "/static/"
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
-    CORS_ALLOW_ALL_ORIGINS = True
+    CORS_ALLOW_ALL_ORIGINS = False
+    CORS_ALLOWED_ORIGINS = [
+        'https://react-django-webrtc-group-video-app.vercel.app'
+]
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [

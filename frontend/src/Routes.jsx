@@ -78,7 +78,7 @@ export class Routes extends Component {
         this.setState(() => ({ roomListData: res.data, loadingRooms: false }));
       })
       .catch((error) => {
-        this.setState(() => ({roomListData: [], loadingRooms: false }));
+        this.setState(() => ({ loadingRooms: false }));
         this.printFeedback({ type: "error", feedbackMsg: error.message });
         console.log(error.message);
       });
