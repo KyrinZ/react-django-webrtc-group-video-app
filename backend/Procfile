@@ -1,1 +1,1 @@
-web: uvicorn group_call.settings:ASGI_APPLICATION --host=0.0.0.0 --port=${PORT:-5000}
+web: uvicorn group_call.asgi:application --host=0.0.0.0 --port=${PORT:-5000}
