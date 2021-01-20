@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 if DEBUG:
     env_path = Path('.') / 'group_call/.env'
@@ -142,8 +142,6 @@ USE_TZ = True
 STATIC_URL = "/static/"
 
 # ADDED CUSTOM CONFIGURATION
-STATICFILES_DIRS = [BASE_DIR / "frontend/build/static"]
-
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 
