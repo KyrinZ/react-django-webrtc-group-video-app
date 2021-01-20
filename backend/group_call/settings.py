@@ -173,7 +173,7 @@ if DEBUG:
 else:
     channel_layer = {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": "CONFIG": {
+        "CONFIG": {
             "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
         },
     }
