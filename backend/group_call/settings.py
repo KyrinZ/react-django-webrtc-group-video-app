@@ -164,16 +164,15 @@ AUTH_USER_MODEL = "api.User"
 ASGI_APPLICATION = "group_call.asgi.application"
 
 # Assigning in memory channel layer
-if DEBUG:
-    channel_layer =  {"BACKEND": "channels.layers.InMemoryChannelLayer"}
-else:
-    channel_layer = {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [f"redis://:{os.environ['REDIS_PASSWORD']}@{os.environ['REDIS_URL']}"],
-        },
-    },
+# if DEBUG:
+channel_layer =  {"BACKEND": "channels.layers.InMemoryChannelLayer"}
+# else:
+#     channel_layer = {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [f"redis://:{os.environ['REDIS_PASSWORD']}@{os.environ['REDIS_URL']}"],
+#         },
+#     },
     
-f"redis://:{os.environ['REDIS_PASSWORD']}@{os.environ['REDIS_URL']}"
 
 CHANNEL_LAYERS = {"default": channel_layer}
