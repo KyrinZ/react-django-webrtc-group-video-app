@@ -27,7 +27,8 @@ DEBUG = False
 if DEBUG:
     env_path = Path('.') / 'group_call/.env'
     load_dotenv(dotenv_path=env_path)
-    
+else:
+    load_dotenv()
 SECRET_KEY = os.environ['SECRET_KEY']
 
 
