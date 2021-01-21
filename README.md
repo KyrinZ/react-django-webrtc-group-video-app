@@ -10,7 +10,7 @@
 
 This is one of my early app that I build. The main idea about the app is pretty straight forward, its a group call app. People create public or private rooms to communicate with each other via video. The purpose of making this app was to learn React, Django REST Framework, Websocket and WebRTC. Have no idea what those are? Me neither when I first started, and you don't have to understand it to use this app.
 
-This app was build as a final project for my course in CS50web. There is in depth explanation about the app source code and file structure in 'master' branch's *README.md* file if you wanted to reproduce the app or build your own app based on this or just get an idea how I came to conclusion while building this app. **Warning**, It's pretty long.
+This app was build as a final project for my course in CS50web. There is in depth explanation about the app source code and file structure in 'development-version' branch's [*README.md*](https://github.com/KyrinZero/react-django-webrtc-group-video-app/tree/development-version) file if you wanted to reproduce the app or build your own app based on this or just get an idea how I came to conclusion while building this app. **Warning**, It's pretty long.
 
 ## Technology overview
 
