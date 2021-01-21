@@ -1,12 +1,10 @@
 # Group Call App
 
-[View Site](https://react-django-webrtc-group-video-app.vercel.app/#/)
+[View Live Site](https://react-django-webrtc-group-video-app.vercel.app/#/)
 
 ![screenshots](./readme_screenshots/screenshot16.png)
 
 ![screenshots](./readme_screenshots/screenshot17.png)
-
-![screenshots](./readme_screenshots/screenshot18.png)
 
 ## In order to run the source code
 
